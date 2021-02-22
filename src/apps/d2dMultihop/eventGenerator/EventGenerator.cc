@@ -26,7 +26,7 @@ EventGenerator::~EventGenerator()
 
 void EventGenerator::initialize()
 {
-    EV << "EventGenerator initialize "<< endl;
+    EV_TRACE << "EventGenerator initialize "<< endl;
 
     selfMessage_ = new cMessage("selfMessage");
     eventPeriod_ = par("eventPeriod");
@@ -40,7 +40,7 @@ void EventGenerator::initialize()
         simtime_t offset = (round(SIMTIME_DBL(startTime)*1000)/1000)+simTime();
 
         scheduleAt(offset, selfMessage_);
-        EV << "\t sending event notification in " << offset << " seconds " << endl;
+        EV_TRACE << "\t sending event notification in " << offset << " seconds " << endl;
     }
 }
 
@@ -135,7 +135,7 @@ void EventGenerator::computeTargetNodeSet(std::set<MacNodeId>& targetSet, MacNod
         {
             if (mit->second.distance(srcCoord) < maxBroadcastRadius)
             {
-                EV << " - " << mit->first << endl;
+                EV_TRACE << " - " << mit->first << endl;
                 targetSet.insert(mit->first);
             }
         }

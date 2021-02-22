@@ -62,14 +62,14 @@ void LteIp::endService(cPacket *msg)
         {
             // message from transport: send to peer
             numForwarded_++;
-            EV << "LteIp: message from transport: send to peer" << endl;
+            EV_TRACE << "LteIp: message from transport: send to peer" << endl;
             fromTransport(msg, peerGateOut_);
         }
         else if (msg->getArrivalGate()->isName("ifIn"))
         {
             // message from peer: send to transport
             numForwarded_++;
-            EV << "LteIp: message from peer: send to transport" << endl;
+            EV_TRACE << "LteIp: message from peer: send to transport" << endl;
             toTransport(msg);
         }
         else
@@ -77,7 +77,7 @@ void LteIp::endService(cPacket *msg)
             // error: drop message
             numDropped_++;
             delete msg;
-            EV << "LteIp (INTERNET): Wrong gate " << msg->getArrivalGate()->getName() << endl;
+            EV_TRACE << "LteIp (INTERNET): Wrong gate " << msg->getArrivalGate()->getName() << endl;
         }
     }
     else if( nodeType_ == ENODEB )
@@ -86,7 +86,7 @@ void LteIp::endService(cPacket *msg)
         {
             // message from peer: send to stack
             numForwarded_++;
-            EV << "LteIp: message from peer: send to stack" << endl;
+            EV_TRACE << "LteIp: message from peer: send to stack" << endl;
 
             IPv4Datagram *ipDatagram = check_and_cast<IPv4Datagram *>(msg);
             cPacket *transportPacket = ipDatagram->getEncapsulatedPacket();
@@ -138,7 +138,7 @@ void LteIp::endService(cPacket *msg)
         {
             // message from stack: send to peer
             numForwarded_++;
-            EV << "LteIp: message from stack: send to peer" << endl;
+            EV_TRACE << "LteIp: message from stack: send to peer" << endl;
             send(msg,peerGateOut_);
         }
         else
@@ -146,7 +146,7 @@ void LteIp::endService(cPacket *msg)
             // error: drop message
             numDropped_++;
             delete msg;
-            EV << "LteIp (ENODEB): Wrong gate " << msg->getArrivalGate()->getName() << endl;
+            EV_TRACE << "LteIp (ENODEB): Wrong gate " << msg->getArrivalGate()->getName() << endl;
         }
     }
     else if( nodeType_ == UE )
@@ -155,14 +155,14 @@ void LteIp::endService(cPacket *msg)
         {
             // message from transport: send to stack
             numForwarded_++;
-            EV << "LteIp: message from transport: send to stack" << endl;
+            EV_TRACE << "LteIp: message from transport: send to stack" << endl;
             fromTransport(msg,stackGateOut_);
         }
         else if(msg->getArrivalGate()->isName("stackLte$i"))
         {
             // message from stack: send to transport
             numForwarded_++;
-            EV << "LteIp: message from stack: send to transport" << endl;
+            EV_TRACE << "LteIp: message from stack: send to transport" << endl;
             toTransport(msg);
         }
         else
@@ -170,7 +170,7 @@ void LteIp::endService(cPacket *msg)
             // error: drop message
             numDropped_++;
             delete msg;
-            EV << "LteIp (UE): Wrong gate " << msg->getArrivalGate()->getName() << endl;
+            EV_TRACE << "LteIp (UE): Wrong gate " << msg->getArrivalGate()->getName() << endl;
         }
     }
 
@@ -203,11 +203,11 @@ void LteIp::fromTransport(cPacket * transportPacket, cGate *outputgate)
         IInterfaceTable *interfaceTable = getModuleFromPar<IInterfaceTable>(par("interfaceTableModule"), this);
         // TODO: how do we find the LTE interface?
         src = interfaceTable->getInterfaceByName("wlan")->ipv4Data()->getIPAddress();
-        EV << "Local address used: " << src << endl;
+        EV_TRACE << "Local address used: " << src << endl;
     }
     else
     {
-        EV << "Source address in control info from transport layer " << src << endl;
+        EV_TRACE << "Source address in control info from transport layer " << src << endl;
     }
     datagram->setSrcAddress(src);
 
@@ -277,8 +277,8 @@ void LteIp::toTransport(cPacket * msg)
     }
     catch (cRuntimeError)
     {
-        EV << "Protocol mapping failed with protocol number : " << protocol << endl;
-        EV << "Packet dropped" << endl;
+        EV_TRACE << "Protocol mapping failed with protocol number : " << protocol << endl;
+        EV_TRACE << "Packet dropped" << endl;
         delete msg;
         numForwarded_--;
         numDropped_++;
@@ -312,15 +312,15 @@ void LteIp::toTransport(cPacket * msg)
 void LteIp::setNodeType(std::string s)
 {
     nodeType_ = aToNodeType(s);
-    EV << "Node type: " << s << " -> " << nodeType_ << endl;
+    EV_TRACE << "Node type: " << s << " -> " << nodeType_ << endl;
 }
 
 void LteIp::printControlInfo(FlowControlInfo* ci)
 {
-    EV << "Src IP : " << IPv4Address(ci->getSrcAddr()) << endl;
-    EV << "Dst IP : " << IPv4Address(ci->getDstAddr()) << endl;
-    EV << "Src Port : " << ci->getSrcPort() << endl;
-    EV << "Dst Port : " << ci->getDstPort() << endl;
-    EV << "Seq Num  : " << ci->getSequenceNumber() << endl;
-    EV << "Header Size : " << ci->getHeaderSize() << endl;
+    EV_TRACE << "Src IP : " << IPv4Address(ci->getSrcAddr()) << endl;
+    EV_TRACE << "Dst IP : " << IPv4Address(ci->getDstAddr()) << endl;
+    EV_TRACE << "Src Port : " << ci->getSrcPort() << endl;
+    EV_TRACE << "Dst Port : " << ci->getDstPort() << endl;
+    EV_TRACE << "Seq Num  : " << ci->getSequenceNumber() << endl;
+    EV_TRACE << "Header Size : " << ci->getHeaderSize() << endl;
 }

@@ -56,7 +56,7 @@ void LtePhyBase::initialize(int stage)
 
 void LtePhyBase::handleMessage(cMessage* msg)
 {
-    EV << " LtePhyBase::handleMessage - new message received" << endl;
+    EV_TRACE << " LtePhyBase::handleMessage - new message received" << endl;
 
     if (msg->isSelfMessage())
     {
@@ -76,7 +76,7 @@ void LtePhyBase::handleMessage(cMessage* msg)
     // unknown message
     else
     {
-        EV << "Unknown message received." << endl;
+        EV_TRACE << "Unknown message received." << endl;
         delete msg;
     }
 }
@@ -112,7 +112,7 @@ LteAirFrame *LtePhyBase::createHandoverMessage()
 
 void LtePhyBase::handleUpperMessage(cMessage* msg)
 {
-    EV << "LtePhy: message from stack" << endl;
+    EV_TRACE << "LtePhy: message from stack" << endl;
 
     UserControlInfo* lteInfo = check_and_cast<UserControlInfo*>(
         msg->removeControlInfo());
@@ -147,7 +147,7 @@ void LtePhyBase::handleUpperMessage(cMessage* msg)
     lteInfo->setTxPower(txPower_);
     frame->setControlInfo(lteInfo);
 
-    EV << "LtePhy: " << nodeTypeToA(nodeType_) << " with id " << nodeId_
+    EV_TRACE << "LtePhy: " << nodeTypeToA(nodeType_) << " with id " << nodeId_
        << " sending message to the air channel. Dest=" << lteInfo->getDestId() << endl;
     sendUnicast(frame);
 }
@@ -181,7 +181,7 @@ void LtePhyBase::sendBroadcast(LteAirFrame *airFrame)
 //            airFrame->getControlInfo());
 //
 //    if (i != gateList.end()) {
-//        EV << "Sending broadcast message to " << gateList.size() << " NICs"
+//        EV_TRACE << "Sending broadcast message to " << gateList.size() << " NICs"
 //                << endl;
 // all gates
 //        for(; i != gateList.end(); ++i){
@@ -209,7 +209,7 @@ void LtePhyBase::sendBroadcast(LteAirFrame *airFrame)
 //        // send the original message to the last gate of the last NIC
 //        sendDirect(airFrame, i->second->getOwnerModule(), radioEnd);
 //    } else {
-//        EV << "NIC is not connected to any gates!" << endl;
+//        EV_TRACE << "NIC is not connected to any gates!" << endl;
 //        delete airFrame;
 //    }
 }
@@ -242,7 +242,7 @@ void LtePhyBase::sendMulticast(LteAirFrame *frame)
     {
         if (nodeIt->first != nodeId_ && binder_->isInMulticastGroup(nodeIt->first, groupId))
         {
-            EV << NOW << " LtePhyBase::sendMulticast - node " << nodeIt->first << " is in the multicast group"<< endl;
+            EV_TRACE << NOW << " LtePhyBase::sendMulticast - node " << nodeIt->first << " is in the multicast group"<< endl;
 
             // get a pointer to receiving module
             cModule *receiver = getSimulation()->getModule(nodeIt->second);
@@ -256,12 +256,12 @@ void LtePhyBase::sendMulticast(LteAirFrame *frame)
 
                 if( dist > multicastD2DRange_ )
                 {
-                    EV << NOW << " LtePhyBase::sendMulticast - node too far (" << dist << " > " << multicastD2DRange_ << ". skipping transmission" << endl;
+                    EV_TRACE << NOW << " LtePhyBase::sendMulticast - node too far (" << dist << " > " << multicastD2DRange_ << ". skipping transmission" << endl;
                     continue;
                 }
             }
 
-            EV << NOW << " LtePhyBase::sendMulticast - sending frame to node " << nodeIt->first << endl;
+            EV_TRACE << NOW << " LtePhyBase::sendMulticast - sending frame to node " << nodeIt->first << endl;
 
             sendDirect(frame->dup(), 0, frame->getDuration(), receiver, getReceiverGateIndex(receiver));
         }

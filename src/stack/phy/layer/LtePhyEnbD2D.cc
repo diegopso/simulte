@@ -31,7 +31,7 @@ void LtePhyEnbD2D::initialize(int stage)
 
 void LtePhyEnbD2D::requestFeedback(UserControlInfo* lteinfo, LteAirFrame* frame, LteFeedbackPkt* pkt)
 {
-    EV << NOW << " LtePhyEnbD2D::requestFeedback " << endl;
+    EV_TRACE << NOW << " LtePhyEnbD2D::requestFeedback " << endl;
     //get UE Position
     Coord sendersPos = lteinfo->getCoord();
     cellInfo_->setUePosition(lteinfo->getSourceId(), sendersPos);
@@ -132,7 +132,7 @@ void LtePhyEnbD2D::requestFeedback(UserControlInfo* lteinfo, LteAirFrame* frame,
             dir = UNKNOWN_DIRECTION;
         }
     }
-    EV << "LtePhyEnbD2D::requestFeedback : Pisa Feedback Generated for nodeId: "
+    EV_TRACE << "LtePhyEnbD2D::requestFeedback : Pisa Feedback Generated for nodeId: "
        << nodeId_ << " with generator type "
        << fbGeneratorTypeToA(req.genType) << " Fb size: " << fb_.size() << endl;
 }
@@ -142,12 +142,12 @@ void LtePhyEnbD2D::handleAirFrame(cMessage* msg)
     UserControlInfo* lteInfo = check_and_cast<UserControlInfo*>(msg->removeControlInfo());
     LteAirFrame* frame = static_cast<LteAirFrame*>(msg);
 
-    EV << "LtePhyEnbD2D::handleAirFrame - received new LteAirFrame with ID " << frame->getId() << " from channel" << endl;
+    EV_TRACE << "LtePhyEnbD2D::handleAirFrame - received new LteAirFrame with ID " << frame->getId() << " from channel" << endl;
 
     // handle broadcast packet sent by another eNB
     if (lteInfo->getFrameType() == HANDOVERPKT)
     {
-        EV << "LtePhyEnb::handleAirFrame - received handover packet from another eNodeB. Ignore it." << endl;
+        EV_TRACE << "LtePhyEnb::handleAirFrame - received handover packet from another eNodeB. Ignore it." << endl;
         delete lteInfo;
         delete frame;
         return;
@@ -156,10 +156,10 @@ void LtePhyEnbD2D::handleAirFrame(cMessage* msg)
     // Check if the frame is for us ( MacNodeId matches or - if this is a multicast communication - enrolled in multicast group)
     if (lteInfo->getDestId() != nodeId_)
     {
-        EV << "ERROR: Frame is not for us. Delete it." << endl;
-        EV << "Packet Type: " << phyFrameTypeToA((LtePhyFrameType)lteInfo->getFrameType()) << endl;
-        EV << "Frame MacNodeId: " << lteInfo->getDestId() << endl;
-        EV << "Local MacNodeId: " << nodeId_ << endl;
+        EV_TRACE << "ERROR: Frame is not for us. Delete it." << endl;
+        EV_TRACE << "Packet Type: " << phyFrameTypeToA((LtePhyFrameType)lteInfo->getFrameType()) << endl;
+        EV_TRACE << "Frame MacNodeId: " << lteInfo->getDestId() << endl;
+        EV_TRACE << "Local MacNodeId: " << nodeId_ << endl;
         delete lteInfo;
         delete frame;
         return;
@@ -167,10 +167,10 @@ void LtePhyEnbD2D::handleAirFrame(cMessage* msg)
 
     if (lteInfo->getMulticastGroupId() != -1 && !(binder_->isInMulticastGroup(nodeId_, lteInfo->getMulticastGroupId())))
     {
-        EV << "Frame is for a multicast group, but we do not belong to that group. Delete the frame." << endl;
-        EV << "Packet Type: " << phyFrameTypeToA((LtePhyFrameType)lteInfo->getFrameType()) << endl;
-        EV << "Frame MacNodeId: " << lteInfo->getDestId() << endl;
-        EV << "Local MacNodeId: " << nodeId_ << endl;
+        EV_TRACE << "Frame is for a multicast group, but we do not belong to that group. Delete the frame." << endl;
+        EV_TRACE << "Packet Type: " << phyFrameTypeToA((LtePhyFrameType)lteInfo->getFrameType()) << endl;
+        EV_TRACE << "Frame MacNodeId: " << lteInfo->getDestId() << endl;
+        EV_TRACE << "Local MacNodeId: " << nodeId_ << endl;
         delete lteInfo;
         delete frame;
         return;
@@ -186,9 +186,9 @@ void LtePhyEnbD2D::handleAirFrame(cMessage* msg)
      */
     if (binder_->getNextHop(lteInfo->getSourceId()) != nodeId_)
     {
-        EV << "WARNING: frame from a UE that is leaving this cell (handover): deleted " << endl;
-        EV << "Source MacNodeId: " << lteInfo->getSourceId() << endl;
-        EV << "Master MacNodeId: " << nodeId_ << endl;
+        EV_TRACE << "WARNING: frame from a UE that is leaving this cell (handover): deleted " << endl;
+        EV_TRACE << "Source MacNodeId: " << lteInfo->getSourceId() << endl;
+        EV_TRACE << "Master MacNodeId: " << nodeId_ << endl;
         delete lteInfo;
         delete frame;
         return;
@@ -217,7 +217,7 @@ void LtePhyEnbD2D::handleAirFrame(cMessage* msg)
         // Message from ue
         for (RemoteSet::iterator it = r.begin(); it != r.end(); it++)
         {
-            EV << "LtePhy: Receiving Packet from antenna " << (*it) << "\n";
+            EV_TRACE << "LtePhy: Receiving Packet from antenna " << (*it) << "\n";
 
             /*
              * On eNodeB set the current position
@@ -242,7 +242,7 @@ void LtePhyEnbD2D::handleAirFrame(cMessage* msg)
     else
         numAirFrameNotReceived_++;
 
-    EV << "Handled LteAirframe with ID " << frame->getId() << " with result "
+    EV_TRACE << "Handled LteAirframe with ID " << frame->getId() << " with result "
        << (result ? "RECEIVED" : "NOT RECEIVED") << endl;
 
     cPacket* pkt = frame->decapsulate();

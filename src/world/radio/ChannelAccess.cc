@@ -108,7 +108,7 @@ IChannelControl *ChannelAccess::getChannelControl()
  */
 void ChannelAccess::sendToChannel(AirFrame *msg)
 {
-    EV << "sendToChannel: sending to gates\n";
+    EV_TRACE << "sendToChannel: sending to gates\n";
 
     // delegate it to ChannelControl
     cc->sendToChannel(myRadioRef, msg);

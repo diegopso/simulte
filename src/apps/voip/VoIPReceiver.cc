@@ -43,7 +43,7 @@ void VoIPReceiver::initialize(int stage)
     mInit_ = true;
 
     int port = par("localPort");
-    EV << "VoIPReceiver::initialize - binding to port: local:" << port << endl;
+    EV_TRACE << "VoIPReceiver::initialize - binding to port: local:" << port << endl;
     if (port != -1)
     {
         socket.setOutputGate(gate("udpOut"));
@@ -88,7 +88,7 @@ void VoIPReceiver::handleMessage(cMessage *msg)
 
     //emit(mFrameLossSignal,1.0);
 
-    EV << "VoIPReceiver::handleMessage - Packet received: TALK[" << pPacket->getIDtalk() << "] - FRAME[" << pPacket->getIDframe() << " size: " << (int)pPacket->getByteLength() << " bytes]\n";
+    EV_TRACE << "VoIPReceiver::handleMessage - Packet received: TALK[" << pPacket->getIDtalk() << "] - FRAME[" << pPacket->getIDframe() << " size: " << (int)pPacket->getByteLength() << " bytes]\n";
 
     // emit throughput sample
     totalRcvdBytes_ += (int)pPacket->getByteLength();
@@ -160,14 +160,14 @@ void VoIPReceiver::playout(bool finish)
 
         // avoid printing during finish (as it will print to the standard output)
         if(!finish)
-            EV << "VoIPReceiver::playout - Jitter measured: " << last_jitter << " TALK[" << pPacket->getIDtalk() << "] - FRAME[" << pPacket->getIDframe() << "]\n";
+            EV_TRACE << "VoIPReceiver::playout - Jitter measured: " << last_jitter << " TALK[" << pPacket->getIDtalk() << "] - FRAME[" << pPacket->getIDframe() << "]\n";
 
         //Duplicates management
         if (isArrived[pPacket->getIDframe()])
         {
             // avoid printing during finish (as it will print to the standard output)
             if(!finish)
-                EV << "VoIPReceiver::playout - Duplicated Packet: TALK[" << pPacket->getIDtalk() << "] - FRAME[" << pPacket->getIDframe() << "]\n";
+                EV_TRACE << "VoIPReceiver::playout - Duplicated Packet: TALK[" << pPacket->getIDtalk() << "] - FRAME[" << pPacket->getIDframe() << "]\n";
             delete pPacket;
         }
         else if( last_jitter > 0.0 )
@@ -175,7 +175,7 @@ void VoIPReceiver::playout(bool finish)
             ++playoutLoss;
             // avoid printing during finish (as it will print to the standard output)
             if(!finish)
-                EV << "VoIPReceiver::playout - out of time packet deleted: TALK[" << pPacket->getIDtalk() << "] - FRAME[" << pPacket->getIDframe() << "]\n";
+                EV_TRACE << "VoIPReceiver::playout - out of time packet deleted: TALK[" << pPacket->getIDtalk() << "] - FRAME[" << pPacket->getIDframe() << "]\n";
             emit(voIPJitterSignal_, last_jitter);
             delete pPacket;
         }
@@ -193,7 +193,7 @@ void VoIPReceiver::playout(bool finish)
                 // avoid printing during finish (as it will print to the standard output)
                 if(!finish)
                 {
-                    EV << "VoIPReceiver::playout - Sampleable packet inserted into buffer: TALK["<< pPacket->getIDtalk() << "] - FRAME[" << pPacket->getIDframe()
+                    EV_TRACE << "VoIPReceiver::playout - Sampleable packet inserted into buffer: TALK["<< pPacket->getIDtalk() << "] - FRAME[" << pPacket->getIDframe()
                        << "] - arrival time[" << pPacket->getArrivalTime() << "] -  sampling time[" << pPacket->getPlayoutTime() << "]\n";
                 }
                 --mBufferSpace_;
@@ -209,7 +209,7 @@ void VoIPReceiver::playout(bool finish)
                 // avoid printing during finish (as it will print to the standard output)
                 if(!finish)
                 {
-                    EV << "VoIPReceiver::playout - Buffer is full, discarding packet: TALK[" << pPacket->getIDtalk() << "] - FRAME["
+                    EV_TRACE << "VoIPReceiver::playout - Buffer is full, discarding packet: TALK[" << pPacket->getIDtalk() << "] - FRAME["
                        << pPacket->getIDframe() << "] - arrival time[" << pPacket->getArrivalTime() << "]\n";
                 }
                 delete pPacket;
@@ -223,7 +223,7 @@ void VoIPReceiver::playout(bool finish)
     // avoid printing during finish (as it will print to the standard output)
     if(!finish)
     {
-        EV << "VoIPReceiver::playout - proportionalLoss " << proportionalLoss << "(tailDropLoss=" << tailDropLoss << " - playoutLoss="
+        EV_TRACE << "VoIPReceiver::playout - proportionalLoss " << proportionalLoss << "(tailDropLoss=" << tailDropLoss << " - playoutLoss="
            <<  playoutLoss << " - channelLoss=" << channelLoss << ")\n\n";
     }
 
@@ -244,10 +244,10 @@ void VoIPReceiver::playout(bool finish)
     // avoid printing during finish (as it will print to the standard output)
     if(!finish)
     {
-        EV << "VoIPReceiver::playout - Computed MOS: eModel( " << mPlayoutDelay_ << " , " << tailDropLoss << "+" << playoutLoss << "+"
+        EV_TRACE << "VoIPReceiver::playout - Computed MOS: eModel( " << mPlayoutDelay_ << " , " << tailDropLoss << "+" << playoutLoss << "+"
            << channelLoss << " ) = " << mos << "\n";
 
-        EV << "VoIPReceiver::playout - Playout Delay Adaptation \n" << "\t Old Playout Delay: " << mPlayoutDelay_ << "\n\t Max Jitter Measured: "
+        EV_TRACE << "VoIPReceiver::playout - Playout Delay Adaptation \n" << "\t Old Playout Delay: " << mPlayoutDelay_ << "\n\t Max Jitter Measured: "
            << max_jitter << "\n\n";
     }
 
@@ -256,7 +256,7 @@ void VoIPReceiver::playout(bool finish)
         mPlayoutDelay_ = 0.0;
     // avoid printing during finish (as it will print to the standard output)
     if(!finish)
-        EV << "\t New Playout Delay: " << mPlayoutDelay_ << "\n\n";
+        EV_TRACE << "\t New Playout Delay: " << mPlayoutDelay_ << "\n\n";
 
     delete[] isArrived;
 }

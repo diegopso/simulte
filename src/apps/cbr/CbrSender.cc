@@ -27,7 +27,7 @@ void CbrSender::initialize(int stage)
 {
 
     cSimpleModule::initialize(stage);
-    EV << "CBR Sender initialize: stage " << stage << " - initialize=" << initialized_ << endl;
+    EV_TRACE << "CBR Sender initialize: stage " << stage << " - initialize=" << initialized_ << endl;
 
     if (stage == INITSTAGE_LOCAL)
     {
@@ -50,7 +50,7 @@ void CbrSender::initialize(int stage)
         startTime_ = par("startTime");
         finishTime_ = par("finishTime");
 
-        EV << " finish time " << finishTime_ << endl;
+        EV_TRACE << " finish time " << finishTime_ << endl;
         nframes_ = (finishTime_ - startTime_) / sampling_time;
 
         initTraffic_ = new cMessage("initTraffic");
@@ -64,7 +64,7 @@ void CbrSender::handleMessage(cMessage *msg)
     {
         if (!strcmp(msg->getName(), "selfSource"))
         {
-            EV << "CbrSender::handleMessage - now[" << simTime() << "] <= finish[" << finishTime_ <<"]" <<endl;
+            EV_TRACE << "CbrSender::handleMessage - now[" << simTime() << "] <= finish[" << finishTime_ <<"]" <<endl;
             if( simTime() <= finishTime_ || finishTime_ == 0 )
                 sendCbrPacket();
         }
@@ -80,11 +80,11 @@ void CbrSender::initTraffic()
     if (destModule == NULL)
     {
         // this might happen when users are created dynamically
-        EV << simTime() << "CbrSender::initTraffic - destination " << destAddress << " not found" << endl;
+        EV_TRACE << simTime() << "CbrSender::initTraffic - destination " << destAddress << " not found" << endl;
 
         simtime_t offset = 0.01; // TODO check value
         scheduleAt(simTime()+offset, initTraffic_);
-        EV << simTime() << "CbrSender::initTraffic - the node will retry to initialize traffic in " << offset << " seconds " << endl;
+        EV_TRACE << simTime() << "CbrSender::initTraffic - the node will retry to initialize traffic in " << offset << " seconds " << endl;
     }
     else
     {
@@ -94,7 +94,7 @@ void CbrSender::initTraffic()
         socket.setOutputGate(gate("udpOut"));
         socket.bind(localPort_);
 
-        EV << simTime() << "CbrSender::initialize - binding to port: local:" << localPort_ << " , dest: " << destAddress_.str() << ":" << destPort_ << endl;
+        EV_TRACE << simTime() << "CbrSender::initialize - binding to port: local:" << localPort_ << " , dest: " << destAddress_.str() << ":" << destPort_ << endl;
 
         // calculating traffic starting time
         simtime_t startTime = par("startTime");
@@ -104,13 +104,13 @@ void CbrSender::initTraffic()
         simtime_t offset = (round(SIMTIME_DBL(startTime)*1000)/1000);
 
         scheduleAt(simTime()+startTime, selfSource_);
-        EV << "\t starting traffic in " << startTime << " seconds " << endl;
+        EV_TRACE << "\t starting traffic in " << startTime << " seconds " << endl;
     }
 }
 
 void CbrSender::sendCbrPacket()
 {
-    EV << "CbrSender::sendCbrPacket - Sending frame[" << iDframe_ << "/" << nframes_ << "], next packet at "<< simTime() + sampling_time << endl;
+    EV_TRACE << "CbrSender::sendCbrPacket - Sending frame[" << iDframe_ << "/" << nframes_ << "], next packet at "<< simTime() + sampling_time << endl;
 
     emit(cbrSentPktSignal_, (long)iDframe_);
 

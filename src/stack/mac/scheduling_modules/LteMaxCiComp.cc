@@ -58,7 +58,7 @@ bool LteMaxCiComp::getBandLimit(std::vector<BandLimit>* bandLimit, MacNodeId ueI
 
 void LteMaxCiComp::prepareSchedule()
 {
-    EV << NOW << " LteMaxCiComp::schedule " << eNbScheduler_->mac_->getMacNodeId() << endl;
+    EV_TRACE << NOW << " LteMaxCiComp::schedule " << eNbScheduler_->mac_->getMacNodeId() << endl;
 
     if (binder_ == NULL)
         binder_ = getBinder();
@@ -128,7 +128,7 @@ void LteMaxCiComp::prepareSchedule()
         // insert the cid score
         score.push (desc);
 
-        EV << NOW << " LteMaxCiComp::schedule computed for cid " << cid << " score of " << desc.score_ << endl;
+        EV_TRACE << NOW << " LteMaxCiComp::schedule computed for cid " << cid << " score of " << desc.score_ << endl;
     }
 
     std::vector<BandLimit> usableBands;
@@ -147,7 +147,7 @@ void LteMaxCiComp::prepareSchedule()
         else
             bandLim = &usableBands;
 
-        EV << NOW << " LteMaxCiComp::schedule scheduling connection " << current.x_ << " with score of " << current.score_ << endl;
+        EV_TRACE << NOW << " LteMaxCiComp::schedule scheduling connection " << current.x_ << " with score of " << current.score_ << endl;
 
         // Grant data to that connection.
         bool terminate = false;
@@ -155,7 +155,7 @@ void LteMaxCiComp::prepareSchedule()
         bool eligible = true;
         unsigned int granted = requestGrant (current.x_, 4294967295U, terminate, active, eligible, bandLim);
 
-        EV << NOW << "LteMaxCiComp::schedule granted " << granted << " bytes to connection " << current.x_ << endl;
+        EV_TRACE << NOW << "LteMaxCiComp::schedule granted " << granted << " bytes to connection " << current.x_ << endl;
 
         // Exit immediately if the terminate flag is set.
         if ( terminate ) break;
@@ -164,13 +164,13 @@ void LteMaxCiComp::prepareSchedule()
         if ( ! active || ! eligible )
         {
             score.pop ();
-            EV << NOW << "LteMaxCiComp::schedule  connection " << current.x_ << " was found ineligible" << endl;
+            EV_TRACE << NOW << "LteMaxCiComp::schedule  connection " << current.x_ << " was found ineligible" << endl;
         }
 
         // Set the connection as inactive if indicated by the grant ().
         if ( ! active )
         {
-            EV << NOW << "LteMaxCiComp::schedule scheduling connection " << current.x_ << " set to inactive " << endl;
+            EV_TRACE << NOW << "LteMaxCiComp::schedule scheduling connection " << current.x_ << " set to inactive " << endl;
 
             activeConnectionTempSet_.erase (current.x_);
         }
@@ -188,12 +188,12 @@ void LteMaxCiComp::updateSchedulingInfo()
 
 void LteMaxCiComp::notifyActiveConnection(MacCid cid)
 {
-    EV << NOW << "LteMaxCiComp::notify CID notified " << cid << endl;
+    EV_TRACE << NOW << "LteMaxCiComp::notify CID notified " << cid << endl;
     activeConnectionSet_.insert(cid);
 }
 
 void LteMaxCiComp::removeActiveConnection(MacCid cid)
 {
-    EV << NOW << "LteMaxCiComp::remove CID removed " << cid << endl;
+    EV_TRACE << NOW << "LteMaxCiComp::remove CID removed " << cid << endl;
     activeConnectionSet_.erase(cid);
 }

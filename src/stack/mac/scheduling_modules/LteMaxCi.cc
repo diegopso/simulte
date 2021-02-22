@@ -12,7 +12,7 @@
 
 void LteMaxCi::prepareSchedule()
 {
-    EV << NOW << " LteMaxCI::schedule " << eNbScheduler_->mac_->getMacNodeId() << endl;
+    EV_TRACE << NOW << " LteMaxCI::schedule " << eNbScheduler_->mac_->getMacNodeId() << endl;
 
     if (binder_ == NULL)
         binder_ = getBinder();
@@ -34,7 +34,11 @@ void LteMaxCi::prepareSchedule()
 
         MacNodeId nodeId = MacCidToNodeId(cid);
         OmnetId id = binder_->getOmnetId(nodeId);
-        if(nodeId == 0 || id == 0){
+
+        MacNodeId masterId = binder_->getNextHop(nodeId);
+        MacNodeId myId = eNbScheduler_->mac_->getMacNodeId();
+
+        if(nodeId == 0 || id == 0 || masterId != myId){
                 // node has left the simulation - erase corresponding CIDs
                 activeConnectionSet_.erase(cid);
                 activeConnectionTempSet_.erase(cid);
@@ -90,7 +94,7 @@ void LteMaxCi::prepareSchedule()
         // insert the cid score
         score.push (desc);
 
-        EV << NOW << " LteMaxCI::schedule computed for cid " << cid << " score of " << desc.score_ << endl;
+        EV_TRACE << NOW << " LteMaxCI::schedule computed for cid " << cid << " score of " << desc.score_ << endl;
     }
 
     // Schedule the connections in score order.
@@ -99,7 +103,7 @@ void LteMaxCi::prepareSchedule()
         // Pop the top connection from the list.
         ScoreDesc current = score.top ();
 
-        EV << NOW << " LteMaxCI::schedule scheduling connection " << current.x_ << " with score of " << current.score_ << endl;
+        EV_TRACE << NOW << " LteMaxCI::schedule scheduling connection " << current.x_ << " with score of " << current.score_ << endl;
 
         // Grant data to that connection.
         bool terminate = false;
@@ -107,7 +111,7 @@ void LteMaxCi::prepareSchedule()
         bool eligible = true;
         unsigned int granted = requestGrant (current.x_, 4294967295U, terminate, active, eligible);
 
-        EV << NOW << "LteMaxCI::schedule granted " << granted << " bytes to connection " << current.x_ << endl;
+        EV_TRACE << NOW << "LteMaxCI::schedule granted " << granted << " bytes to connection " << current.x_ << endl;
 
         // Exit immediately if the terminate flag is set.
         if ( terminate ) break;
@@ -116,13 +120,13 @@ void LteMaxCi::prepareSchedule()
         if ( ! active || ! eligible )
         {
             score.pop ();
-            EV << NOW << "LteMaxCI::schedule  connection " << current.x_ << " was found ineligible" << endl;
+            EV_TRACE << NOW << "LteMaxCI::schedule  connection " << current.x_ << " was found ineligible" << endl;
         }
 
         // Set the connection as inactive if indicated by the grant ().
         if ( ! active )
         {
-            EV << NOW << "LteMaxCI::schedule scheduling connection " << current.x_ << " set to inactive " << endl;
+            EV_TRACE << NOW << "LteMaxCI::schedule scheduling connection " << current.x_ << " set to inactive " << endl;
 
             activeConnectionTempSet_.erase (current.x_);
         }
@@ -140,12 +144,12 @@ void LteMaxCi::updateSchedulingInfo()
 
 void LteMaxCi::notifyActiveConnection(MacCid cid)
 {
-    EV << NOW << "LteMaxCI::notify CID notified " << cid << endl;
+    EV_TRACE << NOW << "LteMaxCI::notify CID notified " << cid << endl;
     activeConnectionSet_.insert(cid);
 }
 
 void LteMaxCi::removeActiveConnection(MacCid cid)
 {
-    EV << NOW << "LteMaxCI::remove CID removed " << cid << endl;
+    EV_TRACE << NOW << "LteMaxCI::remove CID removed " << cid << endl;
     activeConnectionSet_.erase(cid);
 }

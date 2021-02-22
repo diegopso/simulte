@@ -27,7 +27,7 @@ void VoDUDPServer::initialize(int stage)
 
     if (stage != INITSTAGE_APPLICATION_LAYER)
         return;
-    EV << "VoD Server initialize: stage " << stage << endl;
+    EV_TRACE << "VoD Server initialize: stage " << stage << endl;
     serverPort = par("localPort");
     inputFileName = par("vod_trace_file").stringValue();
     traceType = par("traceType").stringValue();
@@ -102,7 +102,7 @@ void VoDUDPServer::initialize(int stage)
     }
 
     /* Initialize parameters after the initialize() method */
-    EV << "VoD Server initialize: Trace: " << inputFileName << " trace type " << traceType << endl;
+    EV_TRACE << "VoD Server initialize: Trace: " << inputFileName << " trace type " << traceType << endl;
     cMessage* timer = new cMessage("Timer");
     double start = par("startTime");
     double offset = (double) start + simTime().dbl();
@@ -153,7 +153,7 @@ void VoDUDPServer::handleMessage(cMessage *msg)
                 M1->setNumPkSent((int) (npkt * fps));
 
                 numStreams++;
-                EV << "VoD Server self message: Dest IP: " << clientAddr[i] << " port: " << clientsPort << " start stream: " << (int)(npkt* fps) << endl;
+                EV_TRACE << "VoD Server self message: Dest IP: " << clientAddr[i] << " port: " << clientsPort << " start stream: " << (int)(npkt* fps) << endl;
 //                    scheduleAt(simTime() + vclientsReqTime[i], M1);
                 scheduleAt(simTime(), M1);
             }
@@ -194,7 +194,7 @@ void VoDUDPServer::handleNS2Message(cMessage *msg)
     numPkSentApp++;
     msgNew->setNumPkSent(numPkSentApp);
 
-    EV << "VoD Server Sent New Packet: Dest IP: " << msgNew -> getClientAddr() << " port: " << msgNew -> getClientPort() << endl;
+    EV_TRACE << "VoD Server Sent New Packet: Dest IP: " << msgNew -> getClientAddr() << " port: " << msgNew -> getClientPort() << endl;
     scheduleAt(simTime() + TIME_SLOT, msgNew);
 }
 
@@ -242,7 +242,7 @@ void VoDUDPServer::handleSVCMessage(cMessage *msg)
             frame->setByteLength(svcTrace_[numPkSentApp].length);
             frame->setFrameLength(svcTrace_[numPkSentApp].length + 2 * sizeof(int)); /* Seq_num plus frame length plus payload */
             socket.sendTo(frame, msgNew->getClientAddr(), msgNew->getClientPort());
-            EV << " VoDUDPServer::handleSVCMessage sending frame " << seq_num << std::endl;
+            EV_TRACE << " VoDUDPServer::handleSVCMessage sending frame " << seq_num << std::endl;
             numPkSentApp++;
         }
         msgNew->setNumPkSent(numPkSentApp);

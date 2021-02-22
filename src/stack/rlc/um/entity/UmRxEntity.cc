@@ -39,7 +39,7 @@ UmRxEntity::~UmRxEntity()
 void UmRxEntity::enque(cPacket* pkt)
 {
     Enter_Method("enque()");
-    EV << NOW << " UmRxEntity::enque - buffering new PDU" << endl;
+    EV_TRACE << NOW << " UmRxEntity::enque - buffering new PDU" << endl;
 
     LteRlcUmDataPdu* pdu = check_and_cast<LteRlcUmDataPdu*>(pkt);
     FlowControlInfo* lteInfo = check_and_cast<FlowControlInfo*>(pdu->getControlInfo());
@@ -60,12 +60,12 @@ void UmRxEntity::enque(cPacket* pkt)
     // get the position in the buffer
     int index = tsn - rxWindowDesc_.firstSno_;
 
-    EV << NOW << " UmRxEntity::enque - tsn " << tsn << ", the corresponding index in the buffer is " << index << endl;
+    EV_TRACE << NOW << " UmRxEntity::enque - tsn " << tsn << ", the corresponding index in the buffer is " << index << endl;
 
     // x was already received
     if (tsn >= rxWindowDesc_.firstSnoForReordering_ && tsn < rxWindowDesc_.highestReceivedSno_ && received_.at(index) == true)
     {
-        EV << NOW << " UmRxEntity::enque the received PDU has index " << index << " which points to an already busy location. Discard the PDU" << endl;
+        EV_TRACE << NOW << " UmRxEntity::enque the received PDU has index " << index << " which points to an already busy location. Discard the PDU" << endl;
 
         // TODO
         // Check if the received PDU points
@@ -80,7 +80,7 @@ void UmRxEntity::enque(cPacket* pkt)
     // x was already considered for reordering & reassembling
     if (tsn < rxWindowDesc_.firstSnoForReordering_)
     {
-        EV << NOW << " UmRxEntity::enque the received PDU with " << tsn << " SN was already considered for reordering. Discard the PDU" << endl;
+        EV_TRACE << NOW << " UmRxEntity::enque the received PDU with " << tsn << " SN was already considered for reordering. Discard the PDU" << endl;
         delete pdu;
 
         return;
@@ -154,8 +154,8 @@ void UmRxEntity::enque(cPacket* pkt)
         ue->emit(rlcPduDelayD2D_, (NOW - pdu->getCreationTime()).dbl());
     }
 
-    EV << NOW << " UmRxEntity::enque - tsn " << tsn << ", the corresponding index after shift in the buffer is " << index << endl;
-    EV << NOW << " UmRxEntity::enque - firstSnoReordering " << rxWindowDesc_.firstSnoForReordering_ << endl;
+    EV_TRACE << NOW << " UmRxEntity::enque - tsn " << tsn << ", the corresponding index after shift in the buffer is " << index << endl;
+    EV_TRACE << NOW << " UmRxEntity::enque - firstSnoReordering " << rxWindowDesc_.firstSnoForReordering_ << endl;
 
     index = rxWindowDesc_.firstSnoForReordering_-rxWindowDesc_.firstSno_; //
 
@@ -206,7 +206,7 @@ void UmRxEntity::enque(cPacket* pkt)
 
 void UmRxEntity::moveRxWindow(const int pos)
 {
-    EV << NOW << " UmRxEntity::moveRxWindow moving forth of " << pos << " locations" << endl;
+    EV_TRACE << NOW << " UmRxEntity::moveRxWindow moving forth of " << pos << " locations" << endl;
 
     if (pos <= 0)
         return;  // ignore the shift , it is uneffective.
@@ -230,7 +230,7 @@ void UmRxEntity::moveRxWindow(const int pos)
 
     rxWindowDesc_.firstSno_ += pos;
 
-    EV << NOW << " UmRxEntity::moveRxWindow first sequence number updated to " << rxWindowDesc_.firstSno_ << endl;
+    EV_TRACE << NOW << " UmRxEntity::moveRxWindow first sequence number updated to " << rxWindowDesc_.firstSno_ << endl;
 }
 
 
@@ -302,8 +302,8 @@ void UmRxEntity::toPdcp(LteRlcSdu* rlcSdu)
         ue->emit(rlcDelayD2D_, (NOW - ts).dbl());
     }
 
-    EV << NOW << " UmRxEntity::toPdcp Created PDCP PDU with length " <<  pdcpPdu->getByteLength() << " bytes" << endl;
-    EV << NOW << " UmRxEntity::toPdcp Send packet to upper layer" << endl;
+    EV_TRACE << NOW << " UmRxEntity::toPdcp Created PDCP PDU with length " <<  pdcpPdu->getByteLength() << " bytes" << endl;
+    EV_TRACE << NOW << " UmRxEntity::toPdcp Send packet to upper layer" << endl;
 
     lteRlc->sendDefragmented(pdcpPdu);
 }
@@ -314,10 +314,10 @@ void UmRxEntity::reassemble(unsigned int index)
     if (received_.at(index) == false)
     {
         // consider the case when a PDU is missing or already delivered
-        EV << NOW << " UmRxEntity::reassemble PDU at index " << index << " has not been received or already delivered" << endl;
+        EV_TRACE << NOW << " UmRxEntity::reassemble PDU at index " << index << " has not been received or already delivered" << endl;
         return;
     }
-    EV << NOW << " UmRxEntity::reassemble Consider PDU at index " << index << " for reassembly" << endl;
+    EV_TRACE << NOW << " UmRxEntity::reassemble Consider PDU at index " << index << " for reassembly" << endl;
 
     LteRlcUmDataPdu* pdu = check_and_cast<LteRlcUmDataPdu*>(pduBuffer_.get(index));
     FlowControlInfo* lteInfo = check_and_cast<FlowControlInfo*>(pdu->removeControlInfo());
@@ -364,7 +364,7 @@ void UmRxEntity::reassemble(unsigned int index)
                 switch(fi)
                 {
                     case 0: {  // FI=00
-                        EV << NOW << " UmRxEntity::reassemble The PDU includes one whole SDU [sno=" << sduSno << "]" << endl;
+                        EV_TRACE << NOW << " UmRxEntity::reassemble The PDU includes one whole SDU [sno=" << sduSno << "]" << endl;
                         if (sduLength != sduWholeLength)
                             throw cRuntimeError("UmRxEntity::reassemble(): failed reassembly, the reassembled SDU has size %d B, while the original SDU had size %d B",sduLength,sduWholeLength);
 
@@ -379,7 +379,7 @@ void UmRxEntity::reassemble(unsigned int index)
                         break;
                     }
                     case 1: {  // FI=01
-                        EV << NOW << " UmRxEntity::reassemble The PDU includes the first part [" << sduLength <<" B] of a SDU [sno=" << sduSno << "]" << endl;
+                        EV_TRACE << NOW << " UmRxEntity::reassemble The PDU includes the first part [" << sduLength <<" B] of a SDU [sno=" << sduSno << "]" << endl;
 
                         if (buffered_ != NULL)
                         {
@@ -389,13 +389,13 @@ void UmRxEntity::reassemble(unsigned int index)
 
                         // buffer the SDU and wait for the missing portion
                         buffered_ = rlcSdu->dup();
-                        EV << NOW << " UmRxEntity::reassemble Wait for the missing part..." << endl;
+                        EV_TRACE << NOW << " UmRxEntity::reassemble Wait for the missing part..." << endl;
 
                         break;
                     }
                     case 2: {  // FI=10
                         // it is the last portion of a SDU, take the awaiting SDU
-                        EV << NOW << " UmRxEntity::reassemble The PDU includes the last part [" << sduLength <<" B] of a SDU [sno=" << sduSno << "]" << endl;
+                        EV_TRACE << NOW << " UmRxEntity::reassemble The PDU includes the last part [" << sduLength <<" B] of a SDU [sno=" << sduSno << "]" << endl;
 
                         // check SDU SN
                         if (buffered_ == NULL || (rlcSdu->getSnoMainPacket() != buffered_->getSnoMainPacket()) || ignoreFragment)
@@ -406,14 +406,14 @@ void UmRxEntity::reassemble(unsigned int index)
                                 buffered_ = NULL;
                             }
 
-                            EV << NOW << " UmRxEntity::reassemble The SDU cannot be reassembled, first part missing" << endl;
+                            EV_TRACE << NOW << " UmRxEntity::reassemble The SDU cannot be reassembled, first part missing" << endl;
 
                             delete rlcSdu;
 
                             continue;
                         }
 
-                        EV << NOW << " UmRxEntity::reassemble The waiting SDU has size " <<  buffered_->getByteLength() << " bytes" << endl;
+                        EV_TRACE << NOW << " UmRxEntity::reassemble The waiting SDU has size " <<  buffered_->getByteLength() << " bytes" << endl;
 
                         unsigned int reassembledLength = buffered_->getByteLength() + rlcSdu->getByteLength();
                         if (reassembledLength < sduWholeLength)
@@ -424,7 +424,7 @@ void UmRxEntity::reassemble(unsigned int index)
                                 buffered_ = NULL;
                             }
 
-                            EV << NOW << " UmRxEntity::reassemble The SDU cannot be reassembled, mid part missing" << endl;
+                            EV_TRACE << NOW << " UmRxEntity::reassemble The SDU cannot be reassembled, mid part missing" << endl;
 
                             delete rlcSdu;
 
@@ -449,7 +449,7 @@ void UmRxEntity::reassemble(unsigned int index)
                     }
                     case 3: {  // FI=11
                         // add the length of this SDU to the awaiting SDU and wait for the missing portion
-                        EV << NOW << " UmRxEntity::reassemble The PDU includes the mid part [" << sduLength <<" B] of a SDU [sno=" << sduSno << "]" << endl;
+                        EV_TRACE << NOW << " UmRxEntity::reassemble The PDU includes the mid part [" << sduLength <<" B] of a SDU [sno=" << sduSno << "]" << endl;
 
                         // check SDU SN
                         if (buffered_ == NULL || (rlcSdu->getSnoMainPacket() != buffered_->getSnoMainPacket()))
@@ -460,7 +460,7 @@ void UmRxEntity::reassemble(unsigned int index)
                                 buffered_ = NULL;
                             }
 
-                            EV << NOW << " UmRxEntity::reassemble The SDU cannot be reassembled, first part missing" << endl;
+                            EV_TRACE << NOW << " UmRxEntity::reassemble The SDU cannot be reassembled, first part missing" << endl;
 
                             delete rlcSdu;
 
@@ -469,8 +469,8 @@ void UmRxEntity::reassemble(unsigned int index)
 
                         buffered_->setByteLength(buffered_->getByteLength() + rlcSdu->getByteLength());
 
-                        EV << NOW << " UmRxEntity::reassemble The waiting SDU has size " << buffered_->getByteLength() << " bytes, was " <<  buffered_->getByteLength() - sduLength << " bytes" << endl;
-                        EV << NOW << " UmRxEntity::reassemble Wait for the missing part..." << endl;
+                        EV_TRACE << NOW << " UmRxEntity::reassemble The waiting SDU has size " << buffered_->getByteLength() << " bytes, was " <<  buffered_->getByteLength() - sduLength << " bytes" << endl;
+                        EV_TRACE << NOW << " UmRxEntity::reassemble Wait for the missing part..." << endl;
 
                         break;
                     }
@@ -479,7 +479,7 @@ void UmRxEntity::reassemble(unsigned int index)
             }
             else
             {
-                EV << NOW << " UmRxEntity::reassemble Read the first chunk of the PDU" << endl;
+                EV_TRACE << NOW << " UmRxEntity::reassemble Read the first chunk of the PDU" << endl;
 
                 // read the FI field
                 switch(fi)
@@ -488,7 +488,7 @@ void UmRxEntity::reassemble(unsigned int index)
                     case 0: case 1: {  // FI=00 or FI=01
                         // it is a whole SDU, send the sdu to the PDCP
 
-                        EV << NOW << " UmRxEntity::reassemble This is a whole SDU [sno=" << sduSno << "]" << endl;
+                        EV_TRACE << NOW << " UmRxEntity::reassemble This is a whole SDU [sno=" << sduSno << "]" << endl;
                         if (sduLength != sduWholeLength)
                             throw cRuntimeError("UmRxEntity::reassemble(): failed reassembly, the reassembled SDU has size %d B, while the original SDU had size %d B",sduLength,sduWholeLength);
 
@@ -504,7 +504,7 @@ void UmRxEntity::reassemble(unsigned int index)
                     }
                     case 2: case 3: {  // FI=10 or FI=11
                         // it is the last portion of a SDU, take the awaiting SDU and send to the PDCP
-                        EV << NOW << " UmRxEntity::reassemble This is the last part [" << sduLength <<" B] of a SDU [sno=" << sduSno << "]" << endl;
+                        EV_TRACE << NOW << " UmRxEntity::reassemble This is the last part [" << sduLength <<" B] of a SDU [sno=" << sduSno << "]" << endl;
 
                         // check SDU SN
                         if (buffered_ == NULL || (rlcSdu->getSnoMainPacket() != buffered_->getSnoMainPacket()) || ignoreFragment)
@@ -515,14 +515,14 @@ void UmRxEntity::reassemble(unsigned int index)
                                 buffered_ = NULL;
                             }
 
-                            EV << NOW << " UmRxEntity::reassemble The SDU cannot be reassembled, first part missing" << endl;
+                            EV_TRACE << NOW << " UmRxEntity::reassemble The SDU cannot be reassembled, first part missing" << endl;
 
                             delete rlcSdu;
 
                             continue;
                         }
 
-                        EV << NOW << " UmRxEntity::reassemble The waiting SDU has size " <<  buffered_->getByteLength() << " bytes" << endl;
+                        EV_TRACE << NOW << " UmRxEntity::reassemble The waiting SDU has size " <<  buffered_->getByteLength() << " bytes" << endl;
 
                         unsigned int reassembledLength = buffered_->getByteLength() + rlcSdu->getByteLength();
                         if (reassembledLength < sduWholeLength)
@@ -533,7 +533,7 @@ void UmRxEntity::reassemble(unsigned int index)
                                 buffered_ = NULL;
                             }
 
-                            EV << NOW << " UmRxEntity::reassemble The SDU cannot be reassembled, mid part missing" << endl;
+                            EV_TRACE << NOW << " UmRxEntity::reassemble The SDU cannot be reassembled, mid part missing" << endl;
 
                             delete rlcSdu;
 
@@ -567,7 +567,7 @@ void UmRxEntity::reassemble(unsigned int index)
             {
                 case 0: case 2: {  // FI=00 or FI=10
                     // it is a whole SDU, send the sdu to the PDCP
-                    EV << NOW << " UmRxEntity::reassemble This is a whole SDU [sno=" << sduSno << "]" << endl;
+                    EV_TRACE << NOW << " UmRxEntity::reassemble This is a whole SDU [sno=" << sduSno << "]" << endl;
                     if (sduLength != sduWholeLength)
                         throw cRuntimeError("UmRxEntity::reassemble(): failed reassembly, the reassembled SDU has size %d B, while the original SDU had size %d B",sduLength,sduWholeLength);
 
@@ -583,7 +583,7 @@ void UmRxEntity::reassemble(unsigned int index)
                 }
                 case 1: case 3: {  // FI=01 or FI=11
                     // it is the first portion of a SDU, bufferize it
-                    EV << NOW << " UmRxEntity::reassemble The PDU includes the first part [" << sduLength <<" B] of a SDU [sno=" << sduSno << "]" << endl;
+                    EV_TRACE << NOW << " UmRxEntity::reassemble The PDU includes the first part [" << sduLength <<" B] of a SDU [sno=" << sduSno << "]" << endl;
 
                     if (buffered_ != NULL)
                     {
@@ -593,7 +593,7 @@ void UmRxEntity::reassemble(unsigned int index)
 
                     buffered_ = rlcSdu->dup();
 
-                    EV << NOW << " UmRxEntity::reassemble Wait for the missing part..." << endl;
+                    EV_TRACE << NOW << " UmRxEntity::reassemble Wait for the missing part..." << endl;
 
                     break;
                 }
@@ -603,7 +603,7 @@ void UmRxEntity::reassemble(unsigned int index)
         else
         {
             // it is a whole SDU, send to the PDCP
-            EV << NOW << " UmRxEntity::reassemble This is a whole SDU [sno=" << sduSno << "]" << endl;
+            EV_TRACE << NOW << " UmRxEntity::reassemble This is a whole SDU [sno=" << sduSno << "]" << endl;
             if (sduLength != sduWholeLength)
                 throw cRuntimeError("UmRxEntity::reassemble(): failed reassembly, the reassembled SDU has size %d B, while the original SDU had size %d B",sduLength,sduWholeLength);
 
@@ -622,7 +622,7 @@ void UmRxEntity::reassemble(unsigned int index)
     // remove PDU from buffer
     pduBuffer_.remove(index);
     received_.at(index) = false;
-    EV << NOW << " UmRxEntity::reassemble Removed PDU from position " << index << endl;
+    EV_TRACE << NOW << " UmRxEntity::reassemble Removed PDU from position " << index << endl;
 
     // emit statistics
     MacNodeId ueId;
@@ -737,7 +737,7 @@ void UmRxEntity::handleMessage(cMessage* msg)
     {
         t_reordering_.handle();
 
-        EV << NOW << " UmRxEntity::handleMessage : t_reordering timer has expired " << endl;
+        EV_TRACE << NOW << " UmRxEntity::handleMessage : t_reordering timer has expired " << endl;
 
         unsigned int old = rxWindowDesc_.firstSnoForReordering_;
 
@@ -774,14 +774,14 @@ void UmRxEntity::rlcHandleD2DModeSwitch(bool oldConnection, bool oldMode, bool c
     {
         if (getNodeTypeById(ownerNodeId_) == UE && oldMode == IM)
         {
-            EV << NOW << " UmRxEntity::rlcHandleD2DModeSwitch - nothing to do on DL leg of IM flow" << endl;
+            EV_TRACE << NOW << " UmRxEntity::rlcHandleD2DModeSwitch - nothing to do on DL leg of IM flow" << endl;
             return;
         }
 
         if (clearBuffer)
         {
 
-            EV << NOW << " UmRxEntity::rlcHandleD2DModeSwitch - clear RX buffer of the RLC entity associated to the old mode" << endl;
+            EV_TRACE << NOW << " UmRxEntity::rlcHandleD2DModeSwitch - clear RX buffer of the RLC entity associated to the old mode" << endl;
             for (unsigned int i = 0; i < rxWindowDesc_.windowSize_; i++)
             {
                 // try to reassemble
@@ -809,7 +809,7 @@ void UmRxEntity::rlcHandleD2DModeSwitch(bool oldConnection, bool oldMode, bool c
     }
     else
     {
-        EV << NOW << " UmRxEntity::rlcHandleD2DModeSwitch - handle numbering of the RLC entity associated to the new selected mode" << endl;
+        EV_TRACE << NOW << " UmRxEntity::rlcHandleD2DModeSwitch - handle numbering of the RLC entity associated to the new selected mode" << endl;
 
         // reset sequence numbering
         rxWindowDesc_.clear();

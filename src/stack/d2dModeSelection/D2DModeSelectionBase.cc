@@ -64,7 +64,7 @@ void D2DModeSelectionBase::handleMessage(cMessage *msg)
 
 void D2DModeSelectionBase::doModeSwitchAtHandover(MacNodeId nodeId, bool handoverCompleted)
 {
-    EV << NOW << " D2DModeSelectionBase::doModeSwitchAtHandover - Force mode switching for UE " << nodeId << " (handover)" << endl;
+    EV_TRACE << NOW << " D2DModeSelectionBase::doModeSwitchAtHandover - Force mode switching for UE " << nodeId << " (handover)" << endl;
 
     LteD2DMode newMode;
     if (handoverCompleted)
@@ -104,7 +104,7 @@ void D2DModeSelectionBase::doModeSwitchAtHandover(MacNodeId nodeId, bool handove
             // update peering map
             jt->second = newMode;
 
-            EV << NOW << " D2DModeSelectionBase::doModeSwitchAtHandover - Flow: " << srcId << " --> " << dstId << " [" << d2dModeToA(newMode) << "]" << endl;
+            EV_TRACE << NOW << " D2DModeSelectionBase::doModeSwitchAtHandover - Flow: " << srcId << " --> " << dstId << " [" << d2dModeToA(newMode) << "]" << endl;
         }
     }
 

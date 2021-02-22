@@ -35,7 +35,7 @@ void GtpUserX2::handleMessage(cMessage *msg)
 {
     if (strcmp(msg->getArrivalGate()->getFullName(), "lteStackIn") == 0)
     {
-        EV << "GtpUserX2::handleMessage - message from X2 Manager" << endl;
+        EV_TRACE << "GtpUserX2::handleMessage - message from X2 Manager" << endl;
 
         // obtain the encapsulated IPv4 datagram
         LteX2Message* x2Msg = check_and_cast<LteX2Message*>(msg);
@@ -43,7 +43,7 @@ void GtpUserX2::handleMessage(cMessage *msg)
     }
     else if(strcmp(msg->getArrivalGate()->getFullName(),"udpIn")==0)
     {
-        EV << "GtpUserX2::handleMessage - message from udp layer" << endl;
+        EV_TRACE << "GtpUserX2::handleMessage - message from udp layer" << endl;
 
         GtpUserMsg * gtpMsg = check_and_cast<GtpUserMsg *>(msg);
         handleFromUdp(gtpMsg);
@@ -55,7 +55,7 @@ void GtpUserX2::handleFromStack(LteX2Message* x2Msg)
     // extract destination from the message
     X2NodeId destId = x2Msg->getDestinationId();
     X2NodeId srcId = x2Msg->getSourceId();
-    EV << "GtpUserX2::handleFromStack - Received a LteX2Message with destId[" << destId << "]" << endl;
+    EV_TRACE << "GtpUserX2::handleFromStack - Received a LteX2Message with destId[" << destId << "]" << endl;
 
     // create a new GtpUserMessage
     GtpUserMsg * gtpMsg = new GtpUserMsg();
@@ -71,7 +71,7 @@ void GtpUserX2::handleFromStack(LteX2Message* x2Msg)
 
 void GtpUserX2::handleFromUdp(GtpUserMsg * gtpMsg)
 {
-    EV << "GtpUserX2::handleFromUdp - Decapsulating and sending to local connection." << endl;
+    EV_TRACE << "GtpUserX2::handleFromUdp - Decapsulating and sending to local connection." << endl;
 
     // obtain the original X2 message and send it to the X2 Manager
     LteX2Message * x2Msg = check_and_cast<LteX2Message*>(gtpMsg->decapsulate());

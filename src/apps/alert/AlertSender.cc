@@ -28,7 +28,7 @@ AlertSender::~AlertSender()
 
 void AlertSender::initialize(int stage)
 {
-    EV << "AlertSender::initialize - stage " << stage << endl;
+    EV_TRACE << "AlertSender::initialize - stage " << stage << endl;
 
     cSimpleModule::initialize(stage);
 
@@ -59,7 +59,7 @@ void AlertSender::initialize(int stage)
 
     alertSentMsg_ = registerSignal("alertSentMsg");
 
-    EV << "AlertSender::initialize - binding to port: local:" << localPort_ << " , dest:" << destPort_ << endl;
+    EV_TRACE << "AlertSender::initialize - binding to port: local:" << localPort_ << " , dest:" << destPort_ << endl;
 
     // calculating traffic starting time
     simtime_t startTime = par("startTime");
@@ -70,7 +70,7 @@ void AlertSender::initialize(int stage)
     simtime_t offset = (round(SIMTIME_DBL(startTime)*1000)/1000)+simTime();
 
     scheduleAt(offset,selfSender_);
-    EV << "\t starting traffic in " << offset << " seconds " << endl;
+    EV_TRACE << "\t starting traffic in " << offset << " seconds " << endl;
 }
 
 void AlertSender::handleMessage(cMessage *msg)
@@ -90,7 +90,7 @@ void AlertSender::sendAlertPacket()
     packet->setSno(nextSno_);
     packet->setTimestamp(simTime());
     packet->setByteLength(size_);
-    EV << "AlertSender::sendAlertPacket - Sending message [" << nextSno_ << "]\n";
+    EV_TRACE << "AlertSender::sendAlertPacket - Sending message [" << nextSno_ << "]\n";
 
     socket.sendTo(packet, destAddress_, destPort_);
     nextSno_++;
@@ -100,5 +100,5 @@ void AlertSender::sendAlertPacket()
     if( simTime()< stopTime_ || stopTime_ == 0 )
         scheduleAt(simTime() + period_, selfSender_);
     else
-        EV << "AlertSender::sendAlertPacket - Stop time reached, stopping transmissions" << endl;
+        EV_TRACE << "AlertSender::sendAlertPacket - Stop time reached, stopping transmissions" << endl;
 }

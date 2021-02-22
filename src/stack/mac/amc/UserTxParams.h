@@ -197,42 +197,42 @@ class UserTxParams
         {
         try
         {
-            EV << NOW << " " << s << " --------------------------\n";
-            EV << NOW << " " << s << "           UserTxParams\n";
-            EV << NOW << " " << s << " --------------------------\n";
-            EV << NOW << " " << s << " TxMode: " << txModeToA(txMode_) << "\n";
-            EV << NOW << " " << s << " RI: " << ri_ << "\n";
+            EV_TRACE << NOW << " " << s << " --------------------------\n";
+            EV_TRACE << NOW << " " << s << "           UserTxParams\n";
+            EV_TRACE << NOW << " " << s << " --------------------------\n";
+            EV_TRACE << NOW << " " << s << " TxMode: " << txModeToA(txMode_) << "\n";
+            EV_TRACE << NOW << " " << s << " RI: " << ri_ << "\n";
 
             //*** CQIs *********************************************
             unsigned int codewords = cqiVector_.size();
-            EV << NOW << " " << s << " CQI = {";
+            EV_TRACE << NOW << " " << s << " CQI = {";
             if(codewords > 0)
             {
-                EV << cqiVector_.at(0);
+                EV_TRACE << cqiVector_.at(0);
                 for(Codeword cw = 1; cw < codewords; ++cw)
-                EV << ", " << cqiVector_.at(cw);
+                EV_TRACE << ", " << cqiVector_.at(cw);
             }
-            EV << "}\n";
+            EV_TRACE << "}\n";
             //******************************************************
 
-            EV << NOW << " " << s << " PMI: " << pmi_ << "\n";
+            EV_TRACE << NOW << " " << s << " PMI: " << pmi_ << "\n";
 
             //*** Bands ********************************************
             std::set<Band>::const_iterator it = allowedBands_.begin();
             std::set<Band>::const_iterator et = allowedBands_.end();
 
-            EV << NOW << " " << s << " Bands = {";
+            EV_TRACE << NOW << " " << s << " Bands = {";
             if(it != et)
             {
-                EV << *it;
+                EV_TRACE << *it;
                 ++it;
                 for(; it != et; ++it)
-                EV << ", " << *it;
+                EV_TRACE << ", " << *it;
             }
-            EV << "}\n";
+            EV_TRACE << "}\n";
             //******************************************************
 
-            EV << NOW << " " << s << " --------------------------\n";
+            EV_TRACE << NOW << " " << s << " --------------------------\n";
         }
         catch(std::exception& e)
         {

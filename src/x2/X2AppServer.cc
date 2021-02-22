@@ -73,8 +73,8 @@ void X2AppServer::handleMessage(cMessage *msg)
     cGate* incoming = pkt->getArrivalGate();
     if (incoming == x2ManagerIn_)
     {
-        EV << "X2AppServer::handleMessage - Received message from x2 manager" << endl;
-        EV << "X2AppServer::handleMessage - Forwarding to X2 interface" << endl;
+        EV_TRACE << "X2AppServer::handleMessage - Received message from x2 manager" << endl;
+        EV_TRACE << "X2AppServer::handleMessage - Forwarding to X2 interface" << endl;
 
         // generate a SCTP packet and sent to lower layer
         generateAndSend(pkt);

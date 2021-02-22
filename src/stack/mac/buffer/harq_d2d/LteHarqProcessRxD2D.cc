@@ -55,7 +55,7 @@ LteHarqFeedback *LteHarqProcessRxD2D::createFeedback(Codeword cw)
         if (pduInfo->getDirection() == D2D_MULTI)
         {
             // if the PDU belongs to a multicast/broadcast connection, then reset the codeword, since there will be no retransmission
-            EV << NOW << " LteHarqProcessRxD2D::createFeedback - pdu for cw " << cw << " belonged to a multicast/broadcast connection. Resetting cw " << endl;
+            EV_TRACE << NOW << " LteHarqProcessRxD2D::createFeedback - pdu for cw " << cw << " belonged to a multicast/broadcast connection. Resetting cw " << endl;
             delete pdu_.at(cw);
             pdu_.at(cw) = NULL;
             resetCodeword(cw);
@@ -65,10 +65,10 @@ LteHarqFeedback *LteHarqProcessRxD2D::createFeedback(Codeword cw)
             // NACK will be sent
             status_.at(cw) = RXHARQ_PDU_CORRUPTED;
 
-            EV << "LteHarqProcessRx::createFeedback - tx number " << (unsigned int)transmissions_ << endl;
+            EV_TRACE << "LteHarqProcessRx::createFeedback - tx number " << (unsigned int)transmissions_ << endl;
             if (transmissions_ == (maxHarqRtx_ + 1))
             {
-                EV << NOW << " LteHarqProcessRxD2D::createFeedback - max number of tx reached for cw " << cw << ". Resetting cw" << endl;
+                EV_TRACE << NOW << " LteHarqProcessRxD2D::createFeedback - max number of tx reached for cw " << cw << ". Resetting cw" << endl;
 
                 // purge PDU
                 purgeCorruptedPdu(cw);

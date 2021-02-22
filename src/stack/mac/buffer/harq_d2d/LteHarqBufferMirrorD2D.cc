@@ -20,7 +20,7 @@ LteHarqBufferMirrorD2D::LteHarqBufferMirrorD2D(unsigned int numProc, unsigned ch
 
 void LteHarqBufferMirrorD2D::receiveHarqFeedback(LteHarqFeedbackMirror *fbpkt)
 {
-    EV << "LteHarqBufferMirrorD2D::receiveHarqFeedback - start" << endl;
+    EV_TRACE << "LteHarqBufferMirrorD2D::receiveHarqFeedback - start" << endl;
 
     bool result = fbpkt->getResult();
     HarqAcknowledgment harqResult = result ? HARQACK : HARQNACK;
@@ -32,7 +32,7 @@ void LteHarqBufferMirrorD2D::receiveHarqFeedback(LteHarqFeedbackMirror *fbpkt)
 
     // debug output
     const char *ack = result ? "ACK" : "NACK";
-    EV << "H-ARQ MIRROR: feedback received for process " << (int)acid << " codeword " << (int)cw << " result is " << ack << endl;
+    EV_TRACE << "H-ARQ MIRROR: feedback received for process " << (int)acid << " codeword " << (int)cw << " result is " << ack << endl;
     delete fbpkt;
 }
 

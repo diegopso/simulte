@@ -20,7 +20,7 @@ void AlertReceiver::initialize(int stage)
         return;
 
     int port = par("localPort");
-    EV << "AlertReceiver::initialize - binding to port: local:" << port << endl;
+    EV_TRACE << "AlertReceiver::initialize - binding to port: local:" << port << endl;
     if (port != -1)
     {
         socket.setOutputGate(gate("udpOut"));
@@ -55,7 +55,7 @@ void AlertReceiver::handleMessage(cMessage *msg)
     emit(alertDelay_, delay);
     emit(alertRcvdMsg_, (long)1);
 
-    EV << "AlertReceiver::handleMessage - Packet received: SeqNo[" << pkt->getSno() << "] Delay[" << delay << "]" << endl;
+    EV_TRACE << "AlertReceiver::handleMessage - Packet received: SeqNo[" << pkt->getSno() << "] Delay[" << delay << "]" << endl;
 
     delete msg;
 }

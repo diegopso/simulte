@@ -42,7 +42,7 @@ void ConflictGraph::clearConflictGraph()
 
 void ConflictGraph::computeConflictGraph()
 {
-    EV << " ConflictGraph::computeConflictGraph - START "<<endl;
+    EV_TRACE << " ConflictGraph::computeConflictGraph - START "<<endl;
 
     // --- remove the old one --- //
     clearConflictGraph();
@@ -50,56 +50,56 @@ void ConflictGraph::computeConflictGraph()
     // --- find the vertices of the graph by scanning the peering map --- //
     std::vector<CGVertex> vertices;
     findVertices(vertices);
-    EV << " ConflictGraph::computeConflictGraph - " << vertices.size() << " vertices found" << endl;
+    EV_TRACE << " ConflictGraph::computeConflictGraph - " << vertices.size() << " vertices found" << endl;
 
     // --- for each CGVertex, find the interfering vertices --- //
     findEdges(vertices);
 
-    EV << " ConflictGraph::computeConflictGraph - END "<<endl;
+    EV_TRACE << " ConflictGraph::computeConflictGraph - END "<<endl;
 
 }
 
 void ConflictGraph::printConflictGraph()
 {
-    EV << " ConflictGraph::printConflictGraph "<<endl;
+    EV_TRACE << " ConflictGraph::printConflictGraph "<<endl;
 
     if (conflictGraph_.empty())
     {
-        EV << " ConflictGraph::printConflictGraph - No reuse enabled "<<endl;
+        EV_TRACE << " ConflictGraph::printConflictGraph - No reuse enabled "<<endl;
         return;
     }
 
-    EV << "              ";
+    EV_TRACE << "              ";
     CGMatrix::iterator it = conflictGraph_.begin(), et = conflictGraph_.end();
     for (; it != et; ++it)
     {
         if (it->first.isMulticast())
-            EV << "| (" << it->first.srcId << ", *  ) ";
+            EV_TRACE << "| (" << it->first.srcId << ", *  ) ";
         else
-            EV << "| (" << it->first.srcId << "," << it->first.dstId <<") ";
+            EV_TRACE << "| (" << it->first.srcId << "," << it->first.dstId <<") ";
     }
-    EV << endl;
+    EV_TRACE << endl;
 
     it = conflictGraph_.begin();
     for (; it != et; ++it)
     {
         if (it->first.isMulticast())
-            EV << "| (" << it->first.srcId << ", *  ) ";
+            EV_TRACE << "| (" << it->first.srcId << ", *  ) ";
         else
-            EV << "| (" << it->first.srcId << "," << it->first.dstId <<") ";
+            EV_TRACE << "| (" << it->first.srcId << "," << it->first.dstId <<") ";
         std::map<CGVertex, bool>::iterator jt = it->second.begin();
         for (; jt != it->second.end(); ++jt)
         {
             if (it->first == jt->first)
             {
-                EV << "|      -      ";
+                EV_TRACE << "|      -      ";
             }
             else
             {
-                EV << "|      " << jt->second << "      ";
+                EV_TRACE << "|      " << jt->second << "      ";
             }
         }
-        EV << endl;
+        EV_TRACE << endl;
     }
-    EV << endl;
+    EV_TRACE << endl;
 }

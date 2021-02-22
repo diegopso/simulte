@@ -37,7 +37,7 @@ UmTxEntity* LteRlcUm::getTxBuffer(FlowControlInfo* lteInfo)
             txEnt->setFlowControlInfo(lteInfo->dup());
         }
 
-        EV << "LteRlcUm : Added new UmTxEntity: " << txEnt->getId() <<
+        EV_TRACE << "LteRlcUm : Added new UmTxEntity: " << txEnt->getId() <<
         " for node: " << nodeId << " for Lcid: " << lcid << "\n";
 
         return txEnt;
@@ -45,7 +45,7 @@ UmTxEntity* LteRlcUm::getTxBuffer(FlowControlInfo* lteInfo)
     else
     {
         // Found
-        EV << "LteRlcUm : Using old UmTxBuffer: " << it->second->getId() <<
+        EV_TRACE << "LteRlcUm : Using old UmTxBuffer: " << it->second->getId() <<
         " for node: " << nodeId << " for Lcid: " << lcid << "\n";
 
         return it->second;
@@ -79,7 +79,7 @@ UmRxEntity* LteRlcUm::getRxBuffer(FlowControlInfo* lteInfo)
         // store control info for this flow
         rxEnt->setFlowControlInfo(lteInfo->dup());
 
-        EV << "LteRlcUm : Added new UmRxEntity: " << rxEnt->getId() <<
+        EV_TRACE << "LteRlcUm : Added new UmRxEntity: " << rxEnt->getId() <<
         " for node: " << nodeId << " for Lcid: " << lcid << "\n";
 
         return rxEnt;
@@ -87,7 +87,7 @@ UmRxEntity* LteRlcUm::getRxBuffer(FlowControlInfo* lteInfo)
     else
     {
         // Found
-        EV << "LteRlcUm : Using old UmRxEntity: " << it->second->getId() <<
+        EV_TRACE << "LteRlcUm : Using old UmRxEntity: " << it->second->getId() <<
         " for node: " << nodeId << " for Lcid: " << lcid << "\n";
 
         return it->second;
@@ -99,7 +99,7 @@ void LteRlcUm::sendDefragmented(cPacket *pkt)
     Enter_Method_Silent("sendDefragmented()");                    // Direct Method Call
     take(pkt);                                                    // Take ownership
 
-    EV << "LteRlcUm : Sending packet " << pkt->getName() << " to port UM_Sap_up$o\n";
+    EV_TRACE << "LteRlcUm : Sending packet " << pkt->getName() << " to port UM_Sap_up$o\n";
     send(pkt, up_[OUT]);
 
     emit(sentPacketToUpperLayer, pkt);
@@ -109,7 +109,7 @@ void LteRlcUm::sendToLowerLayer(cPacket *pkt)
 {
     Enter_Method_Silent("sendToLowerLayer()");                    // Direct Method Call
     take(pkt);                                                    // Take ownership
-    EV << "LteRlcUm : Sending packet " << pkt->getName() << " to port UM_Sap_down$o\n";
+    EV_TRACE << "LteRlcUm : Sending packet " << pkt->getName() << " to port UM_Sap_down$o\n";
     send(pkt, down_[OUT]);
 
     emit(sentPacketToLowerLayer, pkt);
@@ -117,7 +117,7 @@ void LteRlcUm::sendToLowerLayer(cPacket *pkt)
 
 void LteRlcUm::handleUpperMessage(cPacket *pkt)
 {
-    EV << "LteRlcUm::handleUpperMessage - Received packet " << pkt->getName() << " from upper layer, size " << pkt->getByteLength() << "\n";
+    EV_TRACE << "LteRlcUm::handleUpperMessage - Received packet " << pkt->getName() << " from upper layer, size " << pkt->getByteLength() << "\n";
 
     FlowControlInfo* lteInfo = check_and_cast<FlowControlInfo*>(pkt->removeControlInfo());
 
@@ -135,7 +135,7 @@ void LteRlcUm::handleUpperMessage(cPacket *pkt)
     if (txbuf->isHoldingDownstreamInPackets())
     {
         // do not store in the TX buffer and do not signal the MAC layer
-        EV << "LteRlcUm::handleUpperMessage - Enque packet " << rlcPkt->getName() << " into the Holding Buffer\n";
+        EV_TRACE << "LteRlcUm::handleUpperMessage - Enque packet " << rlcPkt->getName() << " into the Holding Buffer\n";
         txbuf->enqueHoldingPackets(rlcPkt);
     }
     else
@@ -148,11 +148,11 @@ void LteRlcUm::handleUpperMessage(cPacket *pkt)
         newDataPkt->encapsulate(rlcPktDup);
         newDataPkt->setControlInfo(lteInfo->dup());
 
-        EV << "LteRlcUm::handleUpperMessage - Sending message " << newDataPkt->getName() << " to port UM_Sap_down$o\n";
+        EV_TRACE << "LteRlcUm::handleUpperMessage - Sending message " << newDataPkt->getName() << " to port UM_Sap_down$o\n";
         send(newDataPkt, down_[OUT]);
 
         // Bufferize RLC SDU
-        EV << "LteRlcUm::handleUpperMessage - Enque packet " << rlcPkt->getName() << " into the Tx Buffer\n";
+        EV_TRACE << "LteRlcUm::handleUpperMessage - Enque packet " << rlcPkt->getName() << " into the Tx Buffer\n";
         txbuf->enque(rlcPkt);
 
     }
@@ -162,7 +162,7 @@ void LteRlcUm::handleUpperMessage(cPacket *pkt)
 
 void LteRlcUm::handleLowerMessage(cPacket *pkt)
 {
-    EV << "LteRlcUm::handleLowerMessage - Received packet " << pkt->getName() << " from lower layer\n";
+    EV_TRACE << "LteRlcUm::handleLowerMessage - Received packet " << pkt->getName() << " from lower layer\n";
 
     FlowControlInfo* lteInfo = check_and_cast<FlowControlInfo*>(pkt->getControlInfo());
 
@@ -190,7 +190,7 @@ void LteRlcUm::handleLowerMessage(cPacket *pkt)
         drop(pkt);
 
         // Bufferize PDU
-        EV << "LteRlcUm::handleLowerMessage - Enque packet " << pkt->getName() << " into the Rx Buffer\n";
+        EV_TRACE << "LteRlcUm::handleLowerMessage - Enque packet " << pkt->getName() << " into the Rx Buffer\n";
         rxbuf->enque(pkt);
     }
 }
@@ -213,7 +213,7 @@ void LteRlcUm::deleteQueues(MacNodeId nodeId)
     {
         if (nodeType == UE || (nodeType == ENODEB && MacCidToNodeId(tit->first) == nodeId))
         {
-            delete tit->second;        // Delete Entity
+            tit->second->deleteModule();        // Delete Entity
             txEntities_.erase(tit++);    // Delete Elem
         }
         else
@@ -225,7 +225,7 @@ void LteRlcUm::deleteQueues(MacNodeId nodeId)
     {
         if (nodeType == UE || (nodeType == ENODEB && MacCidToNodeId(rit->first) == nodeId))
         {
-            delete rit->second;        // Delete Entity
+            rit->second->deleteModule();        // Delete Entity
             rxEntities_.erase(rit++);    // Delete Elem
         }
         else
@@ -259,7 +259,7 @@ void LteRlcUm::initialize()
 void LteRlcUm::handleMessage(cMessage* msg)
 {
     cPacket* pkt = check_and_cast<cPacket *>(msg);
-    EV << "LteRlcUm : Received packet " << pkt->getName() << " from port " << pkt->getArrivalGate()->getName() << endl;
+    EV_TRACE << "LteRlcUm : Received packet " << pkt->getName() << " from port " << pkt->getArrivalGate()->getName() << endl;
 
     cGate* incoming = pkt->getArrivalGate();
     if (incoming == up_[IN])

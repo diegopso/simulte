@@ -43,8 +43,8 @@ void DasFilter::setMasterRuSet(MacNodeId masterId)
 
 double DasFilter::receiveBroadcast(LteAirFrame* frame, UserControlInfo* lteInfo)
 {
-    EV << "DAS Filter: Received Broadcast\n";
-    EV << "DAS Filter: ReportingSet now contains:\n";
+    EV_TRACE << "DAS Filter: Received Broadcast\n";
+    EV_TRACE << "DAS Filter: ReportingSet now contains:\n";
     reportingSet_.clear();
 
     double rssiEnb = 0;
@@ -57,16 +57,16 @@ double DasFilter::receiveBroadcast(LteAirFrame* frame, UserControlInfo* lteInfo)
         for (it=rssiV.begin();it!=rssiV.end();++it)
             rssi+=*it;
         rssi /= rssiV.size();
-        //EV << "Sender Position: (" << senderPos.getX() << "," << senderPos.getY() << ")\n";
-        //EV << "My Position: (" << myPos.getX() << "," << myPos.getY() << ")\n";
+        //EV_TRACE << "Sender Position: (" << senderPos.getX() << "," << senderPos.getY() << ")\n";
+        //EV_TRACE << "My Position: (" << myPos.getX() << "," << myPos.getY() << ")\n";
 
-        EV << "RU" << i << " RSSI: " << rssi;
+        EV_TRACE << "RU" << i << " RSSI: " << rssi;
         if (rssi > rssiThreshold_)
         {
-            EV << " is associated";
+            EV_TRACE << " is associated";
             reportingSet_.insert((Remote)i);
         }
-        EV << "\n";
+        EV_TRACE << "\n";
         if (i == 0)
             rssiEnb = rssi;
     }

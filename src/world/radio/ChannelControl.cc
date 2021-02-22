@@ -58,7 +58,7 @@ void ChannelControl::initialize()
 {
     coreDebug = hasPar("coreDebug") ? (bool) par("coreDebug") : false;
 
-    EV << "initializing ChannelControl\n";
+    EV_TRACE << "initializing ChannelControl\n";
 
     numChannels = par("numChannels");
     transmissions.resize(numChannels);
@@ -100,7 +100,7 @@ double ChannelControl::calcInterfDist()
     interfDistance = pow(waveLength * waveLength * pMax /
                          (16.0 * M_PI * M_PI * minReceivePower), 1.0 / alpha);
 
-    EV << "max interference distance:" << interfDistance << endl;
+    EV_TRACE << "max interference distance:" << interfDistance << endl;
 
     return interfDistance;
 }
@@ -298,19 +298,19 @@ void ChannelControl::sendToChannel(RadioRef srcRadio, AirFrame *airFrame)
         RadioRef r = neighbors[i];
         if (!r->isActive)
         {
-            EV << "skipping disabled radio interface \n";
+            EV_TRACE << "skipping disabled radio interface \n";
             continue;
         }
         if (r->channel == channel)
         {
-            EV << "sending message to radio listening on the same channel\n";
+            EV_TRACE << "sending message to radio listening on the same channel\n";
             // account for propagation delay, based on distance in meters
             // Over 300m, dt=1us=10 bit times @ 10Mbps
             simtime_t delay = srcRadio->pos.distance(r->pos) / SPEED_OF_LIGHT;
             check_and_cast<cSimpleModule*>(srcRadio->radioModule)->sendDirect(airFrame->dup(), delay, airFrame->getDuration(), r->radioInGate);
         }
         else
-            EV << "skipping radio listening on a different channel\n";
+            EV_TRACE << "skipping radio listening on a different channel\n";
     }
 
     // register transmission

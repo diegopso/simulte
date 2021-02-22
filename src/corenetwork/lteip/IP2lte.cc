@@ -101,7 +101,7 @@ void IP2lte::handleMessage(cMessage *msg)
         {
             // error: drop message
             delete msg;
-            EV << "IP2lte::handleMessage - (ENODEB): Wrong gate " << msg->getArrivalGate()->getName() << endl;
+            EV_TRACE << "IP2lte::handleMessage - (ENODEB): Wrong gate " << msg->getArrivalGate()->getName() << endl;
         }
     }
 
@@ -111,13 +111,13 @@ void IP2lte::handleMessage(cMessage *msg)
         if (msg->getArrivalGate()->isName("upperLayerIn"))
         {
             IPv4Datagram *ipDatagram = check_and_cast<IPv4Datagram *>(msg);
-            EV << "LteIp: message from transport: send to stack" << endl;
+            EV_TRACE << "LteIp: message from transport: send to stack" << endl;
             fromIpUe(ipDatagram);
         }
         else if(msg->getArrivalGate()->isName("stackLte$i"))
         {
             // message from stack: send to transport
-            EV << "LteIp: message from stack: send to transport" << endl;
+            EV_TRACE << "LteIp: message from stack: send to transport" << endl;
             IPv4Datagram *datagram = check_and_cast<IPv4Datagram *>(msg);
             toIpUe(datagram);
         }
@@ -125,7 +125,7 @@ void IP2lte::handleMessage(cMessage *msg)
         {
             // error: drop message
             delete msg;
-            EV << "LteIp (UE): Wrong gate " << msg->getArrivalGate()->getName() << endl;
+            EV_TRACE << "LteIp (UE): Wrong gate " << msg->getArrivalGate()->getName() << endl;
         }
     }
 }
@@ -134,12 +134,12 @@ void IP2lte::handleMessage(cMessage *msg)
 void IP2lte::setNodeType(std::string s)
 {
     nodeType_ = aToNodeType(s);
-    EV << "Node type: " << s << " -> " << nodeType_ << endl;
+    EV_TRACE << "Node type: " << s << " -> " << nodeType_ << endl;
 }
 
 void IP2lte::fromIpUe(IPv4Datagram * datagram)
 {
-    EV << "IP2lte::fromIpUe - message from IP layer: send to stack" << endl;
+    EV_TRACE << "IP2lte::fromIpUe - message from IP layer: send to stack" << endl;
     // Remove control info from IP datagram
     delete(datagram->removeControlInfo());
 
@@ -213,13 +213,13 @@ void IP2lte::toStackUe(IPv4Datagram * datagram)
 
 void IP2lte::toIpUe(IPv4Datagram *datagram)
 {
-    EV << "IP2lte::toIpUe - message from stack: send to IP layer" << endl;
+    EV_TRACE << "IP2lte::toIpUe - message from stack: send to IP layer" << endl;
     send(datagram,ipGateOut_);
 }
 
 void IP2lte::fromIpEnb(IPv4Datagram * datagram)
 {
-    EV << "IP2lte::fromIpEnb - message from IP layer: send to stack" << endl;
+    EV_TRACE << "IP2lte::fromIpEnb - message from IP layer: send to stack" << endl;
     // Remove control info from IP datagram
     delete(datagram->removeControlInfo());
 
@@ -255,7 +255,7 @@ void IP2lte::fromIpEnb(IPv4Datagram * datagram)
 
 void IP2lte::toIpEnb(cMessage * msg)
 {
-    EV << "IP2lte::toIpEnb - message from stack: send to IP layer" << endl;
+    EV_TRACE << "IP2lte::toIpEnb - message from stack: send to IP layer" << endl;
     send(msg,ipGateOut_);
 }
 
@@ -321,12 +321,12 @@ void IP2lte::toStackEnb(IPv4Datagram* datagram)
 
 void IP2lte::printControlInfo(FlowControlInfo* ci)
 {
-    EV << "Src IP : " << IPv4Address(ci->getSrcAddr()) << endl;
-    EV << "Dst IP : " << IPv4Address(ci->getDstAddr()) << endl;
-    EV << "Src Port : " << ci->getSrcPort() << endl;
-    EV << "Dst Port : " << ci->getDstPort() << endl;
-    EV << "Seq Num  : " << ci->getSequenceNumber() << endl;
-    EV << "Header Size : " << ci->getHeaderSize() << endl;
+    EV_TRACE << "Src IP : " << IPv4Address(ci->getSrcAddr()) << endl;
+    EV_TRACE << "Dst IP : " << IPv4Address(ci->getDstAddr()) << endl;
+    EV_TRACE << "Src Port : " << ci->getSrcPort() << endl;
+    EV_TRACE << "Dst Port : " << ci->getDstPort() << endl;
+    EV_TRACE << "Seq Num  : " << ci->getSequenceNumber() << endl;
+    EV_TRACE << "Header Size : " << ci->getHeaderSize() << endl;
 }
 
 
@@ -373,7 +373,7 @@ void IP2lte::registerMulticastGroups()
 
 void IP2lte::triggerHandoverSource(MacNodeId ueId, MacNodeId targetEnb)
 {
-    EV << NOW << " IP2lte::triggerHandoverSource - start tunneling of packets destined to " << ueId << " towards eNB " << targetEnb << endl;
+    EV_TRACE << NOW << " IP2lte::triggerHandoverSource - start tunneling of packets destined to " << ueId << " towards eNB " << targetEnb << endl;
 
     hoForwarding_[ueId] = targetEnb;
 
@@ -384,7 +384,7 @@ void IP2lte::triggerHandoverSource(MacNodeId ueId, MacNodeId targetEnb)
 
 void IP2lte::triggerHandoverTarget(MacNodeId ueId, MacNodeId sourceEnb)
 {
-    EV << NOW << " IP2lte::triggerHandoverTarget - start holding packets destined to " << ueId << endl;
+    EV_TRACE << NOW << " IP2lte::triggerHandoverTarget - start holding packets destined to " << ueId << endl;
 
     // reception of handover command from X2
     hoHolding_.insert(ueId);
@@ -393,7 +393,7 @@ void IP2lte::triggerHandoverTarget(MacNodeId ueId, MacNodeId sourceEnb)
 
 void IP2lte::sendTunneledPacketOnHandover(IPv4Datagram* datagram, MacNodeId targetEnb)
 {
-    EV << "IP2lte::sendTunneledPacketOnHandover - destination is handing over to eNB " << targetEnb << ". Forward packet via X2." << endl;
+    EV_TRACE << "IP2lte::sendTunneledPacketOnHandover - destination is handing over to eNB " << targetEnb << ". Forward packet via X2." << endl;
     if (hoManager_ == NULL)
         hoManager_ = check_and_cast<LteHandoverManager*>(getParentModule()->getSubmodule("handoverManager"));
     hoManager_->forwardDataToTargetEnb(datagram, targetEnb);
@@ -401,7 +401,7 @@ void IP2lte::sendTunneledPacketOnHandover(IPv4Datagram* datagram, MacNodeId targ
 
 void IP2lte::receiveTunneledPacketOnHandover(IPv4Datagram* datagram, MacNodeId sourceEnb)
 {
-    EV << "IP2lte::receiveTunneledPacketOnHandover - received packet via X2 from " << sourceEnb << endl;
+    EV_TRACE << "IP2lte::receiveTunneledPacketOnHandover - received packet via X2 from " << sourceEnb << endl;
     IPv4Address destAddr = datagram->getDestAddress();
     MacNodeId destId = binder_->getMacNodeId(destAddr);
     if (hoFromX2_.find(destId) == hoFromX2_.end())
@@ -415,7 +415,7 @@ void IP2lte::receiveTunneledPacketOnHandover(IPv4Datagram* datagram, MacNodeId s
 
 void IP2lte::signalHandoverCompleteSource(MacNodeId ueId, MacNodeId targetEnb)
 {
-    EV << NOW << " IP2lte::signalHandoverCompleteSource - handover of UE " << ueId << " to eNB " << targetEnb << " completed!" << endl;
+    EV_TRACE << NOW << " IP2lte::signalHandoverCompleteSource - handover of UE " << ueId << " to eNB " << targetEnb << " completed!" << endl;
     hoForwarding_.erase(ueId);
 }
 
@@ -468,7 +468,7 @@ void IP2lte::signalHandoverCompleteTarget(MacNodeId ueId, MacNodeId sourceEnb)
 
 void IP2lte::triggerHandoverUe()
 {
-    EV << NOW << " IP2lte::triggerHandoverUe - start holding packets" << endl;
+    EV_TRACE << NOW << " IP2lte::triggerHandoverUe - start holding packets" << endl;
 
     // reception of handover command from X2
     ueHold_ = true;

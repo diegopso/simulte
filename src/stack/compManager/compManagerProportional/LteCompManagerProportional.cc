@@ -18,7 +18,7 @@ void LteCompManagerProportional::initialize()
 
 void LteCompManagerProportional::provisionalSchedule()
 {
-    EV << NOW << " LteCompManagerProportional::provisionalSchedule - Start " << endl;
+    EV_TRACE << NOW << " LteCompManagerProportional::provisionalSchedule - Start " << endl;
 
     provisionedBlocks_ = 0;
 
@@ -39,7 +39,7 @@ void LteCompManagerProportional::provisionalSchedule()
         Band band = 0;
         bytesPerBlock = mac_->getAmc()->computeBytesOnNRbs(ueId, band, cw,
                 blocks, dir); // The index of the band is useless
-        EV << NOW << " LteCompManagerProportional::provisionalSchedule - Per il nodo: " << ueId << " sono disponibili: " << bytesPerBlock << " bytes in un blocco" << endl;
+        EV_TRACE << NOW << " LteCompManagerProportional::provisionalSchedule - Per il nodo: " << ueId << " sono disponibili: " << bytesPerBlock << " bytes in un blocco" << endl;
 
         // Compute the number of blocks required to satisfy the UE's buffer
         unsigned int reqBlocks;
@@ -47,17 +47,17 @@ void LteCompManagerProportional::provisionalSchedule()
             reqBlocks = 0;
         else
             reqBlocks = (queueLength + bytesPerBlock - 1) / bytesPerBlock;
-        EV << NOW << " LteCompManagerProportional::provisionalSchedule - Per il nodo: " << ueId << " sono necessari: " << reqBlocks << " blocchi" << endl;
+        EV_TRACE << NOW << " LteCompManagerProportional::provisionalSchedule - Per il nodo: " << ueId << " sono necessari: " << reqBlocks << " blocchi" << endl;
 
         provisionedBlocks_ += reqBlocks;
     }
 
-    EV << NOW << " LteCompManagerProportional::provisionalSchedule - End " << endl;
+    EV_TRACE << NOW << " LteCompManagerProportional::provisionalSchedule - End " << endl;
 }
 
 void LteCompManagerProportional::doCoordination()
 {
-    EV << NOW << " LteCompManagerProportional::doCoordination - Start " << endl;
+    EV_TRACE << NOW << " LteCompManagerProportional::doCoordination - Start " << endl;
 
     partitioning_.clear();
     offset_.clear();
@@ -100,7 +100,7 @@ void LteCompManagerProportional::doCoordination()
         offset_.push_back(partitioning_[i]);
     }
 
-    EV << NOW << " LteCompManagerProportional::doCoordination - End " << endl;
+    EV_TRACE << NOW << " LteCompManagerProportional::doCoordination - End " << endl;
 }
 
 X2CompProportionalRequestIE* LteCompManagerProportional::buildClientRequest()

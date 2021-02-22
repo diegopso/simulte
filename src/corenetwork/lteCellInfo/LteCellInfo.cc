@@ -102,7 +102,7 @@ void LteCellInfo::calculateNodePosition(double centerX, double centerY, int nTh,
     *xPos = (x < pgnMinX_) ? pgnMinX_ : (x > pgnMaxX_) ? pgnMaxX_ : x;
     *yPos = (y < pgnMinY_) ? pgnMinY_ : (y > pgnMaxY_) ? pgnMaxY_ : y;
 
-    EV << NOW << " LteCellInfo::calculateNodePosition: Computed node position "
+    EV_TRACE << NOW << " LteCellInfo::calculateNodePosition: Computed node position "
        << *xPos << " , " << *yPos << endl;
 
     return;

@@ -38,7 +38,7 @@ void LtePdcpRrcBase::headerCompress(cPacket* pkt, int headerSize)
     {
         pkt->setByteLength(
             pkt->getByteLength() - headerSize + headerCompressedSize_);
-        EV << "LtePdcp : Header compression performed\n";
+        EV_TRACE << "LtePdcp : Header compression performed\n";
     }
 }
 
@@ -48,7 +48,7 @@ void LtePdcpRrcBase::headerDecompress(cPacket* pkt, int headerSize)
     {
         pkt->setByteLength(
             pkt->getByteLength() + headerSize - headerCompressedSize_);
-        EV << "LtePdcp : Header decompression performed\n";
+        EV_TRACE << "LtePdcp : Header decompression performed\n";
     }
 }
 
@@ -108,7 +108,7 @@ void LtePdcpRrcBase::fromDataPort(cPacket *pkt)
     headerCompress(pkt, lteInfo->getHeaderSize()); // header compression
 
     // Cid Request
-    EV << "LteRrc : Received CID request for Traffic [ " << "Source: "
+    EV_TRACE << "LteRrc : Received CID request for Traffic [ " << "Source: "
        << IPv4Address(lteInfo->getSrcAddr()) << "@" << lteInfo->getSrcPort()
        << " Destination: " << IPv4Address(lteInfo->getDstAddr()) << "@"
        << lteInfo->getDstPort() << " ]\n";
@@ -121,14 +121,14 @@ void LtePdcpRrcBase::fromDataPort(cPacket *pkt)
         // LCID not found
         mylcid = lcid_++;
 
-        EV << "LteRrc : Connection not found, new CID created with LCID " << mylcid << "\n";
+        EV_TRACE << "LteRrc : Connection not found, new CID created with LCID " << mylcid << "\n";
 
         ht_->create_entry(lteInfo->getSrcAddr(), lteInfo->getDstAddr(),
             lteInfo->getSrcPort(), lteInfo->getDstPort(), mylcid);
     }
 
-    EV << "LteRrc : Assigned Lcid: " << mylcid << "\n";
-    EV << "LteRrc : Assigned Node ID: " << nodeId_ << "\n";
+    EV_TRACE << "LteRrc : Assigned Lcid: " << mylcid << "\n";
+    EV_TRACE << "LteRrc : Assigned Node ID: " << nodeId_ << "\n";
 
     // get the PDCP entity for this LCID
     LtePdcpEntity* entity = getEntity(mylcid);
@@ -150,16 +150,16 @@ void LtePdcpRrcBase::fromDataPort(cPacket *pkt)
         lteInfo->getRlcType() == UM ? PDCP_HEADER_UM : PDCP_HEADER_AM);
     pdcpPkt->encapsulate(pkt);
 
-    EV << "LtePdcp : Preparing to send "
+    EV_TRACE << "LtePdcp : Preparing to send "
        << lteTrafficClassToA((LteTrafficClass) lteInfo->getTraffic())
        << " traffic\n";
-    EV << "LtePdcp : Packet size " << pdcpPkt->getByteLength() << " Bytes\n";
+    EV_TRACE << "LtePdcp : Packet size " << pdcpPkt->getByteLength() << " Bytes\n";
 
     lteInfo->setSourceId(nodeId_);
     lteInfo->setLcid(mylcid);
     pdcpPkt->setControlInfo(lteInfo);
 
-    EV << "LtePdcp : Sending packet " << pdcpPkt->getName() << " on port "
+    EV_TRACE << "LtePdcp : Sending packet " << pdcpPkt->getName() << " on port "
        << (lteInfo->getRlcType() == UM ? "UM_Sap$o\n" : "AM_Sap$o\n");
 
     // Send message
@@ -175,7 +175,7 @@ void LtePdcpRrcBase::fromEutranRrcSap(cPacket *pkt)
     lteInfo->setLcid(1000);
     lteInfo->setRlcType(TM);
     pkt->setControlInfo(lteInfo);
-    EV << "LteRrc : Sending packet " << pkt->getName() << " on port TM_Sap$o\n";
+    EV_TRACE << "LteRrc : Sending packet " << pkt->getName() << " on port TM_Sap$o\n";
     send(pkt, tmSap_[OUT]);
 }
 
@@ -190,8 +190,8 @@ void LtePdcpRrcBase::toDataPort(cPacket *pkt)
     FlowControlInfo* lteInfo = check_and_cast<FlowControlInfo*>(
         pdcpPkt->removeControlInfo());
 
-    EV << "LtePdcp : Received packet with CID " << lteInfo->getLcid() << "\n";
-    EV << "LtePdcp : Packet size " << pdcpPkt->getByteLength() << " Bytes\n";
+    EV_TRACE << "LtePdcp : Received packet with CID " << lteInfo->getLcid() << "\n";
+    EV_TRACE << "LtePdcp : Packet size " << pdcpPkt->getByteLength() << " Bytes\n";
 
     cPacket* upPkt = pdcpPkt->decapsulate(); // Decapsulate packet
     delete pdcpPkt;
@@ -199,7 +199,7 @@ void LtePdcpRrcBase::toDataPort(cPacket *pkt)
     headerDecompress(upPkt, lteInfo->getHeaderSize()); // Decompress packet header
     handleControlInfo(upPkt, lteInfo);
 
-    EV << "LtePdcp : Sending packet " << upPkt->getName()
+    EV_TRACE << "LtePdcp : Sending packet " << upPkt->getName()
        << " on port DataPort$o\n";
     // Send message
     send(upPkt, dataPort_[OUT]);
@@ -211,7 +211,7 @@ void LtePdcpRrcBase::toEutranRrcSap(cPacket *pkt)
     cPacket* upPkt = pkt->decapsulate();
     delete pkt;
 
-    EV << "LteRrc : Sending packet " << upPkt->getName()
+    EV_TRACE << "LteRrc : Sending packet " << upPkt->getName()
        << " on port EUTRAN_RRC_Sap$o\n";
     send(upPkt, eutranRrcSap_[OUT]);
 }
@@ -255,7 +255,7 @@ void LtePdcpRrcBase::initialize(int stage)
 void LtePdcpRrcBase::handleMessage(cMessage* msg)
 {
     cPacket* pkt = check_and_cast<cPacket *>(msg);
-    EV << "LtePdcp : Received packet " << pkt->getName() << " from port "
+    EV_TRACE << "LtePdcp : Received packet " << pkt->getName() << " from port "
        << pkt->getArrivalGate()->getName() << endl;
 
     cGate* incoming = pkt->getArrivalGate();
@@ -288,14 +288,14 @@ LtePdcpEntity* LtePdcpRrcBase::getEntity(LogicalCid lcid)
         LtePdcpEntity* ent = new LtePdcpEntity();
         entities_[lcid] = ent;    // Add to entities map
 
-        EV << "LtePdcpRrcBase::getEntity - Added new PdcpEntity for Lcid: " << lcid << "\n";
+        EV_TRACE << "LtePdcpRrcBase::getEntity - Added new PdcpEntity for Lcid: " << lcid << "\n";
 
         return ent;
     }
     else
     {
         // Found
-        EV << "LtePdcpRrcBase::getEntity - Using old PdcpEntity for Lcid: " << lcid << "\n";
+        EV_TRACE << "LtePdcpRrcBase::getEntity - Using old PdcpEntity for Lcid: " << lcid << "\n";
 
         return it->second;
     }

@@ -25,7 +25,7 @@ LteHarqBufferTxD2D::LteHarqBufferTxD2D(unsigned int numProc, LteMacBase *owner, 
 
 void LteHarqBufferTxD2D::receiveHarqFeedback(LteHarqFeedback *fbpkt)
 {
-    EV << "LteHarqBufferTxD2D::receiveHarqFeedback - start" << endl;
+    EV_TRACE << "LteHarqBufferTxD2D::receiveHarqFeedback - start" << endl;
 
     bool result = fbpkt->getResult();
     HarqAcknowledgment harqResult = result ? HARQACK : HARQNACK;
@@ -37,7 +37,7 @@ void LteHarqBufferTxD2D::receiveHarqFeedback(LteHarqFeedback *fbpkt)
     // After handover or a D2D mode switch, the process nay have been dropped. The received feedback must be ignored.
     if ((*processes_)[acid]->isDropped())
     {
-        EV << "H-ARQ TX buffer: received pdu for acid " << (int)acid << ". The corresponding unit has been "
+        EV_TRACE << "H-ARQ TX buffer: received pdu for acid " << (int)acid << ". The corresponding unit has been "
         " reset after handover or a D2D mode switch (the contained pdu was dropped). Ignore feedback." << endl;
         delete fbpkt;
         return;
@@ -46,10 +46,10 @@ void LteHarqBufferTxD2D::receiveHarqFeedback(LteHarqFeedback *fbpkt)
     if (fbPduId != unitPduId)
     {
         // fb is not for the pdu in this unit, maybe the addressed one was dropped
-        EV << "H-ARQ TX buffer: received pdu for acid " << (int)acid << "Codeword " << cw << " not addressed"
+        EV_TRACE << "H-ARQ TX buffer: received pdu for acid " << (int)acid << "Codeword " << cw << " not addressed"
         " to the actually contained pdu (maybe it was dropped)" << endl;
-        EV << "Received id: " << fbPduId << endl;
-        EV << "PDU id: " << unitPduId << endl;
+        EV_TRACE << "Received id: " << fbPduId << endl;
+        EV_TRACE << "PDU id: " << unitPduId << endl;
         // todo: comment endsim after tests
         throw cRuntimeError("H-ARQ TX: fb is not for the pdu in this unit, maybe the addressed one was dropped");
     }
@@ -61,7 +61,7 @@ void LteHarqBufferTxD2D::receiveHarqFeedback(LteHarqFeedback *fbpkt)
 
     // debug output
     const char *ack = result ? "ACK" : "NACK";
-    EV << "H-ARQ TX: feedback received for process " << (int)acid << " codeword " << (int)cw << ""
+    EV_TRACE << "H-ARQ TX: feedback received for process " << (int)acid << " codeword " << (int)cw << ""
     " result is " << ack << endl;
     delete fbpkt;
 }

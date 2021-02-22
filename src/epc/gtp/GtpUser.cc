@@ -49,14 +49,14 @@ void GtpUser::handleMessage(cMessage *msg)
 {
     if (strcmp(msg->getArrivalGate()->getFullName(), "trafficFlowFilterGate") == 0)
     {
-        EV << "GtpUser::handleMessage - message from trafficFlowFilter" << endl;
+        EV_TRACE << "GtpUser::handleMessage - message from trafficFlowFilter" << endl;
         // obtain the encapsulated IPv4 datagram
         IPv4Datagram * datagram = check_and_cast<IPv4Datagram*>(msg);
         handleFromTrafficFlowFilter(datagram);
     }
     else if(strcmp(msg->getArrivalGate()->getFullName(),"udpIn")==0)
     {
-        EV << "GtpUser::handleMessage - message from udp layer" << endl;
+        EV_TRACE << "GtpUser::handleMessage - message from udp layer" << endl;
 
         GtpUserMsg * gtpMsg = check_and_cast<GtpUserMsg *>(msg);
         handleFromUdp(gtpMsg);
@@ -70,7 +70,7 @@ void GtpUser::handleFromTrafficFlowFilter(IPv4Datagram * datagram)
     TrafficFlowTemplateId flowId = tftInfo->getTft();
     delete (tftInfo);
 
-    EV << "GtpUser::handleFromTrafficFlowFilter - Received a tftMessage with flowId[" << flowId << "]" << endl;
+    EV_TRACE << "GtpUser::handleFromTrafficFlowFilter - Received a tftMessage with flowId[" << flowId << "]" << endl;
 
     TunnelEndpointIdentifier nextTeid;
     L3Address tunnelPeerAddress;
@@ -80,7 +80,7 @@ void GtpUser::handleFromTrafficFlowFilter(IPv4Datagram * datagram)
     tftIt = tftTable_.find(flowId);
     if (tftIt == tftTable_.end())
     {
-        EV << "GtpUser::handleFromTrafficFlowFilter - Cannot find entry for TFT " << flowId << ". Discarding packet;" << endl;
+        EV_TRACE << "GtpUser::handleFromTrafficFlowFilter - Cannot find entry for TFT " << flowId << ". Discarding packet;" << endl;
         return;
     }
     tunnelPeerAddress = tftIt->second.nextHop;
@@ -111,7 +111,7 @@ void GtpUser::handleFromUdp(GtpUserMsg * gtpMsg)
     LabelTable::iterator teidIt = teidTable_.find(oldTeid);
     if (teidIt == teidTable_.end())
     {
-        EV << "GtpUser::handleFromUdp - Cannot find entry for TEID " << oldTeid << ". Discarding packet;" << endl;
+        EV_TRACE << "GtpUser::handleFromUdp - Cannot find entry for TEID " << oldTeid << ". Discarding packet;" << endl;
         return;
     }
     ConnectionInfo teidInfo = teidIt->second;
@@ -119,7 +119,7 @@ void GtpUser::handleFromUdp(GtpUserMsg * gtpMsg)
     // decide here whether performing a label switching or a label removal
     if (teidInfo.teid == LOCAL_ADDRESS_TEID) // tunneling ended.
     {
-        EV << "GtpUser::handleFromUdp - IP packet pointing to this network. Decapsulating and sending to local connection." << endl;
+        EV_TRACE << "GtpUser::handleFromUdp - IP packet pointing to this network. Decapsulating and sending to local connection." << endl;
 
         // obtain the original IP datagram and send it to the local network
         IPv4Datagram * datagram = check_and_cast<IPv4Datagram*>(gtpMsg->decapsulate());
@@ -128,7 +128,7 @@ void GtpUser::handleFromUdp(GtpUserMsg * gtpMsg)
     }
     else // label switching
     {
-        EV << "GtpUser::handleFromUdp - performing label switching: [" << oldTeid << "]->[" << teidInfo.teid
+        EV_TRACE << "GtpUser::handleFromUdp - performing label switching: [" << oldTeid << "]->[" << teidInfo.teid
            << "] - nextHop[" << teidInfo.nextHop << "]." << endl;
         // in case of label switching, send the packet to the next tunnel
         gtpMsg->setTeid(teidInfo.teid);
@@ -143,7 +143,7 @@ void GtpUser::handleFromUdp(GtpUserMsg * gtpMsg)
 bool GtpUser::loadTeidTable(const char * teidTableFile)
 {
     // open and check xml file
-    EV << "GtpUser::loadTeidTable - reading file " << teidTableFile << endl;
+    EV_TRACE << "GtpUser::loadTeidTable - reading file " << teidTableFile << endl;
     cXMLElement* config = getEnvir()->getXMLDocument(teidTableFile);
     if (config == NULL)
     error("GtpUser::loadTeidTable: Cannot read configuration from file: %s", teidTableFile);
@@ -182,7 +182,7 @@ bool GtpUser::loadTeidTable(const char * teidTableFile)
                 temp[attrId] = (*teidsIt)->getAttribute(attributes[attrId]);
                 if(temp[attrId]==NULL)
                 {
-                    EV << "GtpUser::loadTeidTable - unable to find attribute " << attributes[attrId] << endl;
+                    EV_TRACE << "GtpUser::loadTeidTable - unable to find attribute " << attributes[attrId] << endl;
                     return false;
                 }
             }
@@ -194,9 +194,9 @@ bool GtpUser::loadTeidTable(const char * teidTableFile)
             std::pair<LabelTable::iterator,bool> ret;
             ret = teidTable_.insert(std::pair<TunnelEndpointIdentifier,ConnectionInfo>(teidIn,ConnectionInfo(teidOut,nextHop)));;
             if (ret.second==false)
-            EV << "GtpUser::loadTeidTable - skipping duplicate entry  with TEID " << ret.first->first << '\n';
+            EV_TRACE << "GtpUser::loadTeidTable - skipping duplicate entry  with TEID " << ret.first->first << '\n';
             else
-            EV << "GtpUser::loadTeidTable - inserted entry: TEIDin[" << teidIn << "] - TEIDout[" << teidOut << "] - NextHop[" << nextHop << "]" << endl;
+            EV_TRACE << "GtpUser::loadTeidTable - inserted entry: TEIDin[" << teidIn << "] - TEIDout[" << teidOut << "] - NextHop[" << nextHop << "]" << endl;
         }
     }
     return true;
@@ -206,7 +206,7 @@ bool GtpUser::loadTeidTable(const char * teidTableFile)
 bool GtpUser::loadTftTable(const char * tftTableFile)
 {
     // open and check xml file
-    EV << "GtpUser::loadTftTable - reading file " << tftTableFile << endl;
+    EV_TRACE << "GtpUser::loadTftTable - reading file " << tftTableFile << endl;
     cXMLElement* config = getEnvir()->getXMLDocument(tftTableFile);
     if (config == NULL)
     error("GtpUser::loadTftTable: Cannot read configuration from file: %s", tftTableFile);
@@ -248,7 +248,7 @@ bool GtpUser::loadTftTable(const char * tftTableFile)
                 temp[attrId] = (*tftIt)->getAttribute(attributes[attrId]);
                 if(temp[attrId]==NULL)
                 {
-                    EV << "GtpUser::loadTftTable - unable to find attribute " << attributes[attrId] << endl;
+                    EV_TRACE << "GtpUser::loadTftTable - unable to find attribute " << attributes[attrId] << endl;
                     return false;
                 }
             }
@@ -262,9 +262,9 @@ bool GtpUser::loadTftTable(const char * tftTableFile)
             std::pair<LabelTable::iterator,bool> ret;
             ret = tftTable_.insert(std::pair<TrafficFlowTemplateId,ConnectionInfo>(tft,ConnectionInfo(teidOut,nextHop)));;
             if (ret.second==false)
-            EV << "GtpUser::loadTftTable - skipping duplicate entry  with TFT " << ret.first->first << '\n';
+            EV_TRACE << "GtpUser::loadTftTable - skipping duplicate entry  with TFT " << ret.first->first << '\n';
             else
-            EV << "GtpUser::loadTtftTable - inserted entry: TFT[" << tft << "] - TEIDout[" << teidOut << "] - NextHop[" << nextHop << "]" << endl;
+            EV_TRACE << "GtpUser::loadTtftTable - inserted entry: TFT[" << tft << "] - TEIDout[" << teidOut << "] - NextHop[" << nextHop << "]" << endl;
         }
     }
     return true;

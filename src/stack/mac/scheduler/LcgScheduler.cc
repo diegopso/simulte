@@ -75,7 +75,7 @@ ScheduleList& LcgScheduler::schedule(unsigned int availableBytes, Direction gran
         it_pair = lcgMap.equal_range((LteTrafficClass) i);
         LcgMap::iterator it = it_pair.first, et = it_pair.second;
 
-        EV << NOW << " LcgScheduler::schedule - Node  " << mac_->getMacNodeId() << ", Starting priority service for traffic class " << i << endl;
+        EV_TRACE << NOW << " LcgScheduler::schedule - Node  " << mac_->getMacNodeId() << ", Starting priority service for traffic class " << i << endl;
 
         //! FIXME Allocation of the same resource to flows with same priority not implemented - not suitable with relays
         for (; it != et; ++it)
@@ -103,7 +103,7 @@ ScheduleList& LcgScheduler::schedule(unsigned int availableBytes, Direction gran
             // Check whether the virtual buffer is empty
             if (queueLength == 0)
             {
-                EV << "LcgScheduler::schedule scheduled connection is no more active " << endl;
+                EV_TRACE << "LcgScheduler::schedule scheduled connection is no more active " << endl;
                 continue; // go to next connection
             }
             else
@@ -138,9 +138,9 @@ ScheduleList& LcgScheduler::schedule(unsigned int availableBytes, Direction gran
                 elem = &statusMap_[cid];
             }
 
-            EV << NOW << " LcgScheduler::schedule Node " << mac_->getMacNodeId() << " , Parameters:" << endl;
-            EV << "\t Logical Channel ID: " << MacCidToLcid(cid) << endl;
-            EV << "\t CID: " << cid << endl;
+            EV_TRACE << NOW << " LcgScheduler::schedule Node " << mac_->getMacNodeId() << " , Parameters:" << endl;
+            EV_TRACE << "\t Logical Channel ID: " << MacCidToLcid(cid) << endl;
+            EV_TRACE << "\t CID: " << cid << endl;
 //                fprintf(stderr, "\tGroup ID: %d\n", desc->parameters_.groupId_);
 //                fprintf(stderr, "\tPriority: %d\n", desc->parameters_.priority_);
 //                fprintf(stderr, "\tMin Reserved Rate: %.0lf bytes/s\n", desc->parameters_.minReservedRate_);
@@ -154,7 +154,7 @@ ScheduleList& LcgScheduler::schedule(unsigned int availableBytes, Direction gran
                 double bucket = elem->bucket_; // TODO parameters -> bucket ;
                 double maximumBucketSize = 10000.0; // TODO  parameters -> maxBurst;
 
-                EV << NOW << " LcgScheduler::schedule Bucket size: " << bucket << " bytes (max size " << maximumBucketSize << " bytes) - BEFORE SERVICE " << endl;
+                EV_TRACE << NOW << " LcgScheduler::schedule Bucket size: " << bucket << " bytes (max size " << maximumBucketSize << " bytes) - BEFORE SERVICE " << endl;
 
                 // if the connection started before last scheduling event , use the
                 // global time interval
@@ -182,11 +182,11 @@ ScheduleList& LcgScheduler::schedule(unsigned int availableBytes, Direction gran
 
                 // update the tracing element accordingly
                 elem->bucket_ = 100.0; // TODO desc->parameters_.bucket_;
-                EV << NOW << " LcgScheduler::schedule Bucket size: " << bucket << " bytes (max size " << maximumBucketSize << " bytes) - AFTER SERVICE " << endl;
+                EV_TRACE << NOW << " LcgScheduler::schedule Bucket size: " << bucket << " bytes (max size " << maximumBucketSize << " bytes) - AFTER SERVICE " << endl;
             }
 
-            EV << NOW << " LcgScheduler::schedule - Node " << mac_->getMacNodeId() << ", remaining grant: " << availableBytes << " bytes " << endl;
-            EV << NOW << " LcgScheduler::schedule - Node " << mac_->getMacNodeId() << " buffer Size: " << toServe << " bytes " << endl;
+            EV_TRACE << NOW << " LcgScheduler::schedule - Node " << mac_->getMacNodeId() << ", remaining grant: " << availableBytes << " bytes " << endl;
+            EV_TRACE << NOW << " LcgScheduler::schedule - Node " << mac_->getMacNodeId() << " buffer Size: " << toServe << " bytes " << endl;
 
 
             // If priority service: (availableBytes>0) && (desc->buffer_.occupancy() > 0) && (desc->parameters_.bucket_ > 0)
@@ -243,9 +243,9 @@ ScheduleList& LcgScheduler::schedule(unsigned int availableBytes, Direction gran
 
                     toServe = 0;
 
-                    EV << NOW << " LcgScheduler::schedule - Node " << mac_->getMacNodeId() << ",  SDU of size " << elem->sentData_ << " selected for transmission" << endl;
-                    EV << NOW << " LcgScheduler::schedule - Node " << mac_->getMacNodeId() << ", remaining grant: " << availableBytes << " bytes" << endl;
-                    EV << NOW << " LcgScheduler::schedule - Node " << mac_->getMacNodeId() << " buffer Size: " << toServe << " bytes" << endl;
+                    EV_TRACE << NOW << " LcgScheduler::schedule - Node " << mac_->getMacNodeId() << ",  SDU of size " << elem->sentData_ << " selected for transmission" << endl;
+                    EV_TRACE << NOW << " LcgScheduler::schedule - Node " << mac_->getMacNodeId() << ", remaining grant: " << availableBytes << " bytes" << endl;
+                    EV_TRACE << NOW << " LcgScheduler::schedule - Node " << mac_->getMacNodeId() << " buffer Size: " << toServe << " bytes" << endl;
                 }
                 else
                 {
@@ -298,9 +298,9 @@ ScheduleList& LcgScheduler::schedule(unsigned int availableBytes, Direction gran
                     toServe -= availableBytes;
                     availableBytes = 0;
 
-                    EV << NOW << " LcgScheduler::schedule - Node " << mac_->getMacNodeId() << ",  SDU of size " << elem->sentData_ << " selected for transmission" << endl;
-                    EV << NOW << " LcgScheduler::schedule - Node " << mac_->getMacNodeId() << ", remaining grant: " << availableBytes << " bytes" << endl;
-                    EV << NOW << " LcgScheduler::schedule - Node " << mac_->getMacNodeId() << " buffer Size: " << toServe << " bytes" << endl;
+                    EV_TRACE << NOW << " LcgScheduler::schedule - Node " << mac_->getMacNodeId() << ",  SDU of size " << elem->sentData_ << " selected for transmission" << endl;
+                    EV_TRACE << NOW << " LcgScheduler::schedule - Node " << mac_->getMacNodeId() << ", remaining grant: " << availableBytes << " bytes" << endl;
+                    EV_TRACE << NOW << " LcgScheduler::schedule - Node " << mac_->getMacNodeId() << " buffer Size: " << toServe << " bytes" << endl;
                 }
             }
 
@@ -369,7 +369,7 @@ ScheduleList& LcgScheduler::schedule(unsigned int availableBytes, Direction gran
                 priorityService = false;
                 //  reset traffic class
                 i = 0;
-                EV << "LcgScheduler::schedule - Node" << mac_->getMacNodeId() << ", Starting best effort service" << endl;
+                EV_TRACE << "LcgScheduler::schedule - Node" << mac_->getMacNodeId() << ", Starting best effort service" << endl;
             }
         } // END of connections cycle
     } // END of Traffic Classes cycle

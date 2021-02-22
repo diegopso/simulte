@@ -61,7 +61,7 @@ void LtePhyRelay::handleAirFrame(cMessage* msg)
 {
     UserControlInfo* lteInfo = check_and_cast<UserControlInfo*>(msg->removeControlInfo());
     LteAirFrame* frame = static_cast<LteAirFrame*>(msg);
-    EV << "LtePhy: received new LteAirFrame with ID "
+    EV_TRACE << "LtePhy: received new LteAirFrame with ID "
        << frame->getId() << " from channel" << endl;
 
     if (lteInfo->getFrameType() == HANDOVERPKT)
@@ -86,7 +86,7 @@ void LtePhyRelay::handleAirFrame(cMessage* msg)
     else
         numAirFrameNotReceived_++;
 
-    EV << "Handled LteAirframe with ID " << frame->getId() << " with result "
+    EV_TRACE << "Handled LteAirframe with ID " << frame->getId() << " with result "
        << ( result ? "RECEIVED" : "NOT RECEIVED" ) << endl;
 
     cPacket* pkt = frame->decapsulate();

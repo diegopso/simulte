@@ -31,7 +31,7 @@ void CbrReceiver::initialize(int stage)
     else if (stage == INITSTAGE_APPLICATION_LAYER)
     {
         int port = par("localPort");
-        EV << "CbrReceiver::initialize - binding to port: local:" << port << endl;
+        EV_TRACE << "CbrReceiver::initialize - binding to port: local:" << port << endl;
         if (port != -1)
         {
             socket.setOutputGate(gate("udpOut"));
@@ -66,7 +66,7 @@ void CbrReceiver::handleMessage(cMessage *msg)
     simtime_t delay = simTime()-pPacket->getTimestamp();
     emit(cbrFrameDelaySignal_,delay );
 
-    EV << "CbrReceiver::handleMessage - Packet received: FRAME[" << pPacket->getIDframe() << "/" << pPacket->getNframes() << "] with delay["<< delay << "]" << endl;
+    EV_TRACE << "CbrReceiver::handleMessage - Packet received: FRAME[" << pPacket->getIDframe() << "/" << pPacket->getNframes() << "] with delay["<< delay << "]" << endl;
 
     emit(cbrRcvdPkt_, (long)pPacket->getIDframe());
 

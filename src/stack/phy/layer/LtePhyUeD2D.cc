@@ -82,7 +82,7 @@ void LtePhyUeD2D::handleAirFrame(cMessage* msg)
     }
     connectedNodeId_ = masterId_;
     LteAirFrame* frame = check_and_cast<LteAirFrame*>(msg);
-    EV << "LtePhyUeD2D: received new LteAirFrame with ID " << frame->getId() << " from channel" << endl;
+    EV_TRACE << "LtePhyUeD2D: received new LteAirFrame with ID " << frame->getId() << " from channel" << endl;
 
     int sourceId = binder_->getOmnetId(lteInfo->getSourceId());
     if(sourceId == 0 )
@@ -110,10 +110,10 @@ void LtePhyUeD2D::handleAirFrame(cMessage* msg)
     // Check if the frame is for us ( MacNodeId matches or - if this is a multicast communication - enrolled in multicast group)
     if (lteInfo->getDestId() != nodeId_ && !(binder_->isInMulticastGroup(nodeId_, lteInfo->getMulticastGroupId())))
     {
-        EV << "ERROR: Frame is not for us. Delete it." << endl;
-        EV << "Packet Type: " << phyFrameTypeToA((LtePhyFrameType)lteInfo->getFrameType()) << endl;
-        EV << "Frame MacNodeId: " << lteInfo->getDestId() << endl;
-        EV << "Local MacNodeId: " << nodeId_ << endl;
+        EV_TRACE << "ERROR: Frame is not for us. Delete it." << endl;
+        EV_TRACE << "Packet Type: " << phyFrameTypeToA((LtePhyFrameType)lteInfo->getFrameType()) << endl;
+        EV_TRACE << "Frame MacNodeId: " << lteInfo->getDestId() << endl;
+        EV_TRACE << "Local MacNodeId: " << nodeId_ << endl;
         delete lteInfo;
         delete frame;
         return;
@@ -169,7 +169,7 @@ void LtePhyUeD2D::handleAirFrame(cMessage* msg)
         // DAS
         for (RemoteSet::iterator it = r.begin(); it != r.end(); it++)
         {
-            EV << "LtePhyUeD2D: Receiving Packet from antenna " << (*it) << "\n";
+            EV_TRACE << "LtePhyUeD2D: Receiving Packet from antenna " << (*it) << "\n";
 
             /*
              * On UE set the sender position
@@ -200,7 +200,7 @@ void LtePhyUeD2D::handleAirFrame(cMessage* msg)
     else
         numAirFrameNotReceived_++;
 
-    EV << "Handled LteAirframe with ID " << frame->getId() << " with result "
+    EV_TRACE << "Handled LteAirframe with ID " << frame->getId() << " with result "
        << ( result ? "RECEIVED" : "NOT RECEIVED" ) << endl;
 
     cPacket* pkt = frame->decapsulate();
@@ -275,7 +275,7 @@ void LtePhyUeD2D::handleUpperMessage(cMessage* msg)
             emit(averageCqiD2D_, cqi);
     }
 
-    EV << NOW << " LtePhyUeD2D::handleUpperMessage - message from stack" << endl;
+    EV_TRACE << NOW << " LtePhyUeD2D::handleUpperMessage - message from stack" << endl;
     LteAirFrame* frame = NULL;
 
     if (lteInfo->getFrameType() == HARQPKT || lteInfo->getFrameType() == GRANTPKT || lteInfo->getFrameType() == RACPKT)
@@ -301,7 +301,7 @@ void LtePhyUeD2D::handleUpperMessage(cMessage* msg)
     lteInfo->setD2dTxPower(d2dTxPower_);
     frame->setControlInfo(lteInfo);
 
-    EV << "LtePhyUeD2D::handleUpperMessage - " << nodeTypeToA(nodeType_) << " with id " << nodeId_
+    EV_TRACE << "LtePhyUeD2D::handleUpperMessage - " << nodeTypeToA(nodeType_) << " with id " << nodeId_
        << " sending message to the air channel. Dest=" << lteInfo->getDestId() << endl;
 
     // if this is a multicast/broadcast connection, send the frame to all neighbors in the hearing range
@@ -350,13 +350,13 @@ void LtePhyUeD2D::storeAirFrame(LteAirFrame* newFrame)
             }
         }
         rsrpMean = sum / allocatedRbs;
-        EV << NOW << " LtePhyUeD2D::storeAirFrame - Average RSRP from node " << newInfo->getSourceId() << ": " << rsrpMean ;
+        EV_TRACE << NOW << " LtePhyUeD2D::storeAirFrame - Average RSRP from node " << newInfo->getSourceId() << ": " << rsrpMean ;
     }
     else  // distance
     {
         Coord newSenderCoord = newInfo->getCoord();
         distance = myCoord.distance(newSenderCoord);
-        EV << NOW << " LtePhyUeD2D::storeAirFrame - Distance from node " << newInfo->getSourceId() << ": " << distance ;
+        EV_TRACE << NOW << " LtePhyUeD2D::storeAirFrame - Distance from node " << newInfo->getSourceId() << ": " << distance ;
     }
 
     if (!d2dReceivedFrames_.empty())
@@ -364,7 +364,7 @@ void LtePhyUeD2D::storeAirFrame(LteAirFrame* newFrame)
         LteAirFrame* prevFrame = d2dReceivedFrames_.front();
         if (!useRsrp && distance < nearestDistance_)
         {
-            EV << "[ < nearestDistance: " << nearestDistance_ << "]" << endl;
+            EV_TRACE << "[ < nearestDistance: " << nearestDistance_ << "]" << endl;
 
             // remove the previous frame
             d2dReceivedFrames_.pop_back();
@@ -375,7 +375,7 @@ void LtePhyUeD2D::storeAirFrame(LteAirFrame* newFrame)
         }
         else if (rsrpMean > bestRsrpMean_)
         {
-            EV << "[ > bestRsrp: " << bestRsrpMean_ << "]" << endl;
+            EV_TRACE << "[ > bestRsrp: " << bestRsrpMean_ << "]" << endl;
 
             // remove the previous frame
             d2dReceivedFrames_.pop_back();
@@ -417,7 +417,7 @@ LteAirFrame* LtePhyUeD2D::extractAirFrame()
 
 void LtePhyUeD2D::decodeAirFrame(LteAirFrame* frame, UserControlInfo* lteInfo)
 {
-    EV << NOW << " LtePhyUeD2D::decodeAirFrame - Start decoding..." << endl;
+    EV_TRACE << NOW << " LtePhyUeD2D::decodeAirFrame - Start decoding..." << endl;
 
     // apply decider to received packet
     bool result = true;
@@ -428,7 +428,7 @@ void LtePhyUeD2D::decodeAirFrame(LteAirFrame* frame, UserControlInfo* lteInfo)
         // DAS
         for (RemoteSet::iterator it = r.begin(); it != r.end(); it++)
         {
-            EV << "LtePhyUeD2D::decodeAirFrame: Receiving Packet from antenna " << (*it) << "\n";
+            EV_TRACE << "LtePhyUeD2D::decodeAirFrame: Receiving Packet from antenna " << (*it) << "\n";
 
             /*
              * On UE set the sender position
@@ -462,7 +462,7 @@ void LtePhyUeD2D::decodeAirFrame(LteAirFrame* frame, UserControlInfo* lteInfo)
     else
         numAirFrameNotReceived_++;
 
-    EV << "Handled LteAirframe with ID " << frame->getId() << " with result "
+    EV_TRACE << "Handled LteAirframe with ID " << frame->getId() << " with result "
        << ( result ? "RECEIVED" : "NOT RECEIVED" ) << endl;
 
     cPacket* pkt = frame->decapsulate();
@@ -482,7 +482,7 @@ void LtePhyUeD2D::decodeAirFrame(LteAirFrame* frame, UserControlInfo* lteInfo)
 void LtePhyUeD2D::sendFeedback(LteFeedbackDoubleVector fbDl, LteFeedbackDoubleVector fbUl, FeedbackRequest req)
 {
     Enter_Method("SendFeedback");
-    EV << "LtePhyUeD2D: feedback from Feedback Generator" << endl;
+    EV_TRACE << "LtePhyUeD2D: feedback from Feedback Generator" << endl;
 
     //Create a feedback packet
     LteFeedbackPkt* fbPkt = new LteFeedbackPkt();
@@ -517,7 +517,7 @@ void LtePhyUeD2D::sendFeedback(LteFeedbackDoubleVector fbDl, LteFeedbackDoubleVe
 //        cellInfo_->lambdaIncrease(nodeId_,1);
 //    }
     lastFeedback_ = NOW;
-    EV << "LtePhy: " << nodeTypeToA(nodeType_) << " with id "
+    EV_TRACE << "LtePhy: " << nodeTypeToA(nodeType_) << " with id "
        << nodeId_ << " sending feedback to the air channel" << endl;
     sendUnicast(frame);
 }

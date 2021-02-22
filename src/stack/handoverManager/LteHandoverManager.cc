@@ -41,7 +41,7 @@ void LteHandoverManager::handleMessage(cMessage *msg)
     if (incoming == x2Manager_[IN])
     {
         // incoming data from X2 Manager
-        EV << "LteHandoverManager::handleMessage - Received message from X2 manager" << endl;
+        EV_TRACE << "LteHandoverManager::handleMessage - Received message from X2 manager" << endl;
         handleX2Message(pkt);
     }
     else

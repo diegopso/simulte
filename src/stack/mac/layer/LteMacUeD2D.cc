@@ -77,7 +77,7 @@ LteMacPdu* LteMacUeD2D::makeBsr(int size){
     bsr->setSize(size);
     macPkt->pushCe(bsr);
     bsrTriggered_ = false;
-    EV << "LteMacUeD2D::makeBsr() - BSR with size " << size << "created" << endl;
+    EV_TRACE << "LteMacUeD2D::makeBsr() - BSR with size " << size << "created" << endl;
     return macPkt;
 }
 
@@ -135,7 +135,7 @@ void LteMacUeD2D::macPduMake(MacCid cid)
             {
                macPduList_[ std::pair<MacNodeId, Codeword>( getMacCellId(), 0) ] = macPktBsr;
                bsrAlreadyMade = true;
-               EV << "LteMacUeD2D::macPduMake - BSR D2D created with size " << sizeBsr << "created" << endl;
+               EV_TRACE << "LteMacUeD2D::macPduMake - BSR D2D created with size " << sizeBsr << "created" << endl;
             }
         }
         else
@@ -270,7 +270,7 @@ void LteMacUeD2D::macPduMake(MacCid cid)
 
         // search for an empty unit within current harq process
         UnitList txList = txBuf->getEmptyUnits(currentHarq_);
-        EV << "LteMacUeD2D::macPduMake - [Used Acid=" << (unsigned int)txList.first << "] , [curr=" << (unsigned int)currentHarq_ << "]" << endl;
+        EV_TRACE << "LteMacUeD2D::macPduMake - [Used Acid=" << (unsigned int)txList.first << "] , [curr=" << (unsigned int)currentHarq_ << "]" << endl;
 
         //Get a reference of the LteMacPdu from pit pointer (extract Pdu from the MAP)
         LteMacPdu* macPkt = pit->second;
@@ -352,17 +352,17 @@ void LteMacUeD2D::macPduMake(MacCid cid)
             macPkt->pushCe(bsr);
             bsrTriggered_ = false;
             bsrD2DMulticastTriggered_ = false;
-            EV << "LteMacUeD2D::macPduMake - BSR created with size " << size << endl;
+            EV_TRACE << "LteMacUeD2D::macPduMake - BSR created with size " << size << endl;
         }
 
-        EV << "LteMacUeD2D: pduMaker created PDU: " << macPkt->info() << endl;
+        EV_TRACE << "LteMacUeD2D: pduMaker created PDU: " << macPkt->info() << endl;
 
         // TODO: harq test
         // pdu transmission here (if any)
         // txAcid has HARQ_NONE for non-fillable codeword, acid otherwise
         if (txList.second.empty())
         {
-            EV << "LteMacUeD2D() : no available process for this MAC pdu in TxHarqBuffer" << endl;
+            EV_TRACE << "LteMacUeD2D() : no available process for this MAC pdu in TxHarqBuffer" << endl;
             delete macPkt;
         }
         else
@@ -390,7 +390,7 @@ void LteMacUeD2D::handleMessage(cMessage* msg)
         UserControlInfo *userInfo = check_and_cast<UserControlInfo *>(pkt->getControlInfo());
         if (userInfo->getFrameType() == D2DMODESWITCHPKT)
         {
-            EV << "LteMacUeD2D::handleMessage - Received packet " << pkt->getName() <<
+            EV_TRACE << "LteMacUeD2D::handleMessage - Received packet " << pkt->getName() <<
             " from port " << pkt->getArrivalGate()->getName() << endl;
 
             // message from PHY_to_MAC gate (from lower layer)
@@ -409,7 +409,7 @@ void LteMacUeD2D::handleMessage(cMessage* msg)
 void
 LteMacUeD2D::macHandleGrant(cPacket* pkt)
 {
-    EV << NOW << " LteMacUeD2D::macHandleGrant - UE [" << nodeId_ << "] - Grant received " << endl;
+    EV_TRACE << NOW << " LteMacUeD2D::macHandleGrant - UE [" << nodeId_ << "] - Grant received " << endl;
 
     // delete old grant
     LteSchedulingGrant* grant = check_and_cast<LteSchedulingGrant*>(pkt);
@@ -431,7 +431,7 @@ LteMacUeD2D::macHandleGrant(cPacket* pkt)
         expirationCounter_=grant->getExpiration();
     }
 
-    EV << NOW << "Node " << nodeId_ << " received grant of blocks " << grant->getTotalGrantedBlocks()
+    EV_TRACE << NOW << "Node " << nodeId_ << " received grant of blocks " << grant->getTotalGrantedBlocks()
        << ", bytes " << grant->getGrantedCwBytes(0) <<" Direction: "<<dirToA(grant->getDirection()) << endl;
 
     // clearing pending RAC requests
@@ -441,7 +441,7 @@ LteMacUeD2D::macHandleGrant(cPacket* pkt)
 
 void LteMacUeD2D::checkRAC()
 {
-    EV << NOW << " LteMacUeD2D::checkRAC , Ue  " << nodeId_ << ", racTimer : " << racBackoffTimer_ << " maxRacTryOuts : " << maxRacTryouts_
+    EV_TRACE << NOW << " LteMacUeD2D::checkRAC , Ue  " << nodeId_ << ", racTimer : " << racBackoffTimer_ << " maxRacTryOuts : " << maxRacTryouts_
        << ", raRespTimer:" << raRespTimer_ << endl;
 
     if (racBackoffTimer_>0)
@@ -454,20 +454,20 @@ void LteMacUeD2D::checkRAC()
     {
         // decrease RAC response timer
         raRespTimer_--;
-        EV << NOW << " LteMacUeD2D::checkRAC - waiting for previous RAC requests to complete (timer=" << raRespTimer_ << ")" << endl;
+        EV_TRACE << NOW << " LteMacUeD2D::checkRAC - waiting for previous RAC requests to complete (timer=" << raRespTimer_ << ")" << endl;
         return;
     }
 
     // Avoids double requests whithin same TTI window
     if (racRequested_)
     {
-        EV << NOW << " LteMacUeD2D::checkRAC - double RAC request" << endl;
+        EV_TRACE << NOW << " LteMacUeD2D::checkRAC - double RAC request" << endl;
         racRequested_=false;
         return;
     }
     if (racD2DMulticastRequested_)
     {
-        EV << NOW << " LteMacUeD2D::checkRAC - double RAC request" << endl;
+        EV_TRACE << NOW << " LteMacUeD2D::checkRAC - double RAC request" << endl;
         racD2DMulticastRequested_=false;
         return;
     }
@@ -491,7 +491,7 @@ void LteMacUeD2D::checkRAC()
     }
 
     if (!trigger && !triggerD2DMulticast)
-        EV << NOW << "Ue " << nodeId_ << ",RAC aborted, no data in queues " << endl;
+        EV_TRACE << NOW << "Ue " << nodeId_ << ",RAC aborted, no data in queues " << endl;
 
     if ((racRequested_=trigger) || (racD2DMulticastRequested_=triggerD2DMulticast))
     {
@@ -505,7 +505,7 @@ void LteMacUeD2D::checkRAC()
 
         sendLowerPackets(racReq);
 
-        EV << NOW << " Ue  " << nodeId_ << " cell " << cellId_ << " ,RAC request sent to PHY " << endl;
+        EV_TRACE << NOW << " Ue  " << nodeId_ << " cell " << cellId_ << " ,RAC request sent to PHY " << endl;
 
         // wait at least  "raRespWinStart_" TTIs before another RAC request
         raRespTimer_ = raRespWinStart_;
@@ -518,7 +518,7 @@ void LteMacUeD2D::macHandleRac(cPacket* pkt)
 
     if (racPkt->getSuccess())
     {
-        EV << "LteMacUeD2D::macHandleRac - Ue " << nodeId_ << " won RAC" << endl;
+        EV_TRACE << "LteMacUeD2D::macHandleRac - Ue " << nodeId_ << " won RAC" << endl;
         // is RAC is won, BSR has to be sent
         if (racD2DMulticastRequested_)
             bsrD2DMulticastTriggered_=true;
@@ -535,7 +535,7 @@ void LteMacUeD2D::macHandleRac(cPacket* pkt)
         // RAC has failed
         if (++currentRacTry_ >= maxRacTryouts_)
         {
-            EV << NOW << " Ue " << nodeId_ << ", RAC reached max attempts : " << currentRacTry_ << endl;
+            EV_TRACE << NOW << " Ue " << nodeId_ << ", RAC reached max attempts : " << currentRacTry_ << endl;
             // no more RAC allowed
             //! TODO flush all buffers here
             //reset RAC counter
@@ -547,7 +547,7 @@ void LteMacUeD2D::macHandleRac(cPacket* pkt)
         {
             // recompute backoff timer
             racBackoffTimer_= uniform(minRacBackoff_,maxRacBackoff_);
-            EV << NOW << " Ue " << nodeId_ << " RAC attempt failed, backoff extracted : " << racBackoffTimer_ << endl;
+            EV_TRACE << NOW << " Ue " << nodeId_ << " RAC attempt failed, backoff extracted : " << racBackoffTimer_ << endl;
         }
     }
     delete racPkt;
@@ -556,7 +556,7 @@ void LteMacUeD2D::macHandleRac(cPacket* pkt)
 
 void LteMacUeD2D::handleSelfMessage()
 {
-    EV << "----- UE MAIN LOOP -----" << endl;
+    EV_TRACE << "----- UE MAIN LOOP -----" << endl;
 
     // extract pdus from all harqrxbuffers and pass them to unmaker
     HarqRxBuffers::iterator hit = harqRxBuffers_.begin();
@@ -575,14 +575,14 @@ void LteMacUeD2D::handleSelfMessage()
         }
     }
 
-    EV << NOW << "LteMacUeD2D::handleSelfMessage " << nodeId_ << " - HARQ process " << (unsigned int)currentHarq_ << endl;
+    EV_TRACE << NOW << "LteMacUeD2D::handleSelfMessage " << nodeId_ << " - HARQ process " << (unsigned int)currentHarq_ << endl;
 
     // no grant available - if user has backlogged data, it will trigger scheduling request
     // no harq counter is updated since no transmission is sent.
 
     if (schedulingGrant_==NULL)
     {
-        EV << NOW << " LteMacUeD2D::handleSelfMessage " << nodeId_ << " NO configured grant" << endl;
+        EV_TRACE << NOW << " LteMacUeD2D::handleSelfMessage " << nodeId_ << " NO configured grant" << endl;
 
         // if necessary, a RAC request will be sent to obtain a grant
         checkRAC();
@@ -616,20 +616,20 @@ void LteMacUeD2D::handleSelfMessage()
     {
         if(!firstTx)
         {
-            EV << "\t currentHarq_ counter initialized " << endl;
+            EV_TRACE << "\t currentHarq_ counter initialized " << endl;
             firstTx=true;
             // the eNb will receive the first pdu in 2 TTI, thus initializing acid to 0
 //            currentHarq_ = harqRxBuffers_.begin()->second->getProcesses() - 2;
             currentHarq_ = UE_TX_HARQ_PROCESSES - 2;
         }
-        EV << "\t " << schedulingGrant_ << endl;
+        EV_TRACE << "\t " << schedulingGrant_ << endl;
 
 //        //! \TEST  Grant Synchronization check
 //        if (!(schedulingGrant_->getPeriodic()))
 //        {
 //            if ( false /* TODO currentHarq!=grant_->getAcid()*/)
 //            {
-//                EV << NOW << "FATAL! Ue " << nodeId_ << " Current Process is " << (int)currentHarq << " while Stored grant refers to acid " << /*(int)grant_->getAcid() << */  ". Aborting.   " << endl;
+//                EV_TRACE << NOW << "FATAL! Ue " << nodeId_ << " Current Process is " << (int)currentHarq << " while Stored grant refers to acid " << /*(int)grant_->getAcid() << */  ". Aborting.   " << endl;
 //                abort();
 //            }
 //        }
@@ -644,7 +644,7 @@ void LteMacUeD2D::handleSelfMessage()
         // buffer drop should occour here.
 //        scheduleList = ueScheduler_->buildSchedList();
 
-        EV << NOW << " LteMacUeD2D::handleSelfMessage " << nodeId_ << " entered scheduling" << endl;
+        EV_TRACE << NOW << " LteMacUeD2D::handleSelfMessage " << nodeId_ << " entered scheduling" << endl;
 
         bool retx = false;
 
@@ -652,14 +652,14 @@ void LteMacUeD2D::handleSelfMessage()
         LteHarqBufferTx * currHarq;
         for(it2 = harqTxBuffers_.begin(); it2 != harqTxBuffers_.end(); it2++)
         {
-            EV << "\t Looking for retx in acid " << (unsigned int)currentHarq_ << endl;
+            EV_TRACE << "\t Looking for retx in acid " << (unsigned int)currentHarq_ << endl;
             currHarq = it2->second;
 
             // check if the current process has unit ready for retx
             bool ready = currHarq->getProcess(currentHarq_)->hasReadyUnits();
             CwList cwListRetx = currHarq->getProcess(currentHarq_)->readyUnitsIds();
 
-            EV << "\t [process=" << (unsigned int)currentHarq_ << "] , [retx=" << ((ready)?"true":"false")
+            EV_TRACE << "\t [process=" << (unsigned int)currentHarq_ << "] , [retx=" << ((ready)?"true":"false")
                << "] , [n=" << cwListRetx.size() << "]" << endl;
 
             // check if one 'ready' unit has the same direction of the grant
@@ -714,7 +714,7 @@ void LteMacUeD2D::handleSelfMessage()
     {
         HarqTxBuffers::iterator it;
 
-        EV << "\n htxbuf.size " << harqTxBuffers_.size() << endl;
+        EV_TRACE << "\n htxbuf.size " << harqTxBuffers_.size() << endl;
 
         int cntOuter = 0;
         int cntInner = 0;
@@ -724,10 +724,10 @@ void LteMacUeD2D::handleSelfMessage()
             BufferStatus harqStatus = currHarq->getBufferStatus();
             BufferStatus::iterator jt = harqStatus.begin(), jet= harqStatus.end();
 
-            EV << "\t cicloOuter " << cntOuter << " - bufferStatus.size=" << harqStatus.size() << endl;
+            EV_TRACE << "\t cicloOuter " << cntOuter << " - bufferStatus.size=" << harqStatus.size() << endl;
             for(; jt != jet; ++jt)
             {
-                EV << "\t\t cicloInner " << cntInner << " - jt->size=" << jt->size()
+                EV_TRACE << "\t\t cicloInner " << cntInner << " - jt->size=" << jt->size()
                    << " - statusCw(0/1)=" << jt->at(0).second << "/" << jt->at(1).second << endl;
             }
         }
@@ -743,7 +743,7 @@ void LteMacUeD2D::handleSelfMessage()
         if (hit->first == cellId_)
             purged += hit->second->purgeCorruptedPdus();
     }
-    EV << NOW << " LteMacUeD2D::handleSelfMessage Purged " << purged << " PDUS" << endl;
+    EV_TRACE << NOW << " LteMacUeD2D::handleSelfMessage Purged " << purged << " PDUS" << endl;
 
     if (requestedSdus_ == 0)
     {
@@ -751,7 +751,7 @@ void LteMacUeD2D::handleSelfMessage()
         currentHarq_ = (currentHarq_+1) % harqProcesses_;
     }
 
-    EV << "--- END UE MAIN LOOP ---" << endl;
+    EV_TRACE << "--- END UE MAIN LOOP ---" << endl;
 }
 
 
@@ -783,7 +783,7 @@ UserTxParams* LteMacUeD2D::getPreconfiguredTxParams()
 
 void LteMacUeD2D::macHandleD2DModeSwitch(cPacket* pkt)
 {
-    EV << NOW << " LteMacUeD2D::macHandleD2DModeSwitch - Start" << endl;
+    EV_TRACE << NOW << " LteMacUeD2D::macHandleD2DModeSwitch - Start" << endl;
 
     // all data in the MAC buffers of the connection to be switched are deleted
 
@@ -811,12 +811,12 @@ void LteMacUeD2D::macHandleD2DModeSwitch(cPacket* pkt)
 
             if (lteInfo->getD2dRxPeerId() == peerId && (Direction)lteInfo->getDirection() == oldDirection)
             {
-                EV << NOW << " LteMacUeD2D::macHandleD2DModeSwitch - found old connection with cid " << cid << ", erasing buffered data" << endl;
+                EV_TRACE << NOW << " LteMacUeD2D::macHandleD2DModeSwitch - found old connection with cid " << cid << ", erasing buffered data" << endl;
                 if (oldDirection != newDirection)
                 {
                     if (switchPkt->getClearRlcBuffer())
                     {
-                        EV << NOW << " LteMacUeD2D::macHandleD2DModeSwitch - erasing buffered data" << endl;
+                        EV_TRACE << NOW << " LteMacUeD2D::macHandleD2DModeSwitch - erasing buffered data" << endl;
 
                         // empty virtual buffer for the selected cid
                         LteMacBufferMap::iterator macBuff_it = macBuffers_.find(cid);
@@ -844,7 +844,7 @@ void LteMacUeD2D::macHandleD2DModeSwitch(cPacket* pkt)
 
                     if (switchPkt->getInterruptHarq())
                     {
-                        EV << NOW << " LteMacUeD2D::macHandleD2DModeSwitch - interrupting H-ARQ processes" << endl;
+                        EV_TRACE << NOW << " LteMacUeD2D::macHandleD2DModeSwitch - interrupting H-ARQ processes" << endl;
 
                         // interrupt H-ARQ processes for SL
                         unsigned int id = peerId;
@@ -880,7 +880,7 @@ void LteMacUeD2D::macHandleD2DModeSwitch(cPacket* pkt)
 
                 if (oldDirection != newDirection && switchPkt->getClearRlcBuffer())
                 {
-                    EV << NOW << " LteMacUeD2D::macHandleD2DModeSwitch - clearing LCG map" << endl;
+                    EV_TRACE << NOW << " LteMacUeD2D::macHandleD2DModeSwitch - clearing LCG map" << endl;
 
                     // remove entry from lcgMap
                     LcgMap::iterator lt = lcgMap_.begin();
@@ -896,11 +896,11 @@ void LteMacUeD2D::macHandleD2DModeSwitch(cPacket* pkt)
                         }
                     }
                 }
-                EV << NOW << " LteMacUeD2D::macHandleD2DModeSwitch - send switch signal to the RLC TX entity corresponding to the old mode, cid " << cid << endl;
+                EV_TRACE << NOW << " LteMacUeD2D::macHandleD2DModeSwitch - send switch signal to the RLC TX entity corresponding to the old mode, cid " << cid << endl;
             }
             else if (lteInfo->getD2dRxPeerId() == peerId && (Direction)lteInfo->getDirection() == newDirection)
             {
-                EV << NOW << " LteMacUeD2D::macHandleD2DModeSwitch - send switch signal to the RLC TX entity corresponding to the new mode, cid " << cid << endl;
+                EV_TRACE << NOW << " LteMacUeD2D::macHandleD2DModeSwitch - send switch signal to the RLC TX entity corresponding to the new mode, cid " << cid << endl;
                 if (oldDirection != newDirection)
                 {
                     D2DModeSwitchNotification* switchPkt_dup = switchPkt->dup();
@@ -927,7 +927,7 @@ void LteMacUeD2D::macHandleD2DModeSwitch(cPacket* pkt)
             lteInfo = check_and_cast<FlowControlInfo*>(&(it->second));
             if (lteInfo->getD2dTxPeerId() == peerId && (Direction)lteInfo->getDirection() == oldDirection)
             {
-                EV << NOW << " LteMacUeD2D::macHandleD2DModeSwitch - found old connection with cid " << cid << ", send signal to the RLC RX entity" << endl;
+                EV_TRACE << NOW << " LteMacUeD2D::macHandleD2DModeSwitch - found old connection with cid " << cid << ", send signal to the RLC RX entity" << endl;
                 if (oldDirection != newDirection)
                 {
                     if (switchPkt->getInterruptHarq())
@@ -963,7 +963,7 @@ void LteMacUeD2D::macHandleD2DModeSwitch(cPacket* pkt)
             }
             else if (lteInfo->getD2dTxPeerId() == peerId && (Direction)lteInfo->getDirection() == newDirection)
             {
-                EV << NOW << " LteMacUeD2D::macHandleD2DModeSwitch - found new connection with cid " << cid << ", send signal to the RLC RX entity" << endl;
+                EV_TRACE << NOW << " LteMacUeD2D::macHandleD2DModeSwitch - found new connection with cid " << cid << ", send signal to the RLC RX entity" << endl;
                 if (oldDirection != newDirection)
                 {
                     D2DModeSwitchNotification* switchPkt_dup = switchPkt->dup();

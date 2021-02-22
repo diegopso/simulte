@@ -44,21 +44,21 @@ void X2AppClient::initialize(int stage)
 
 void X2AppClient::socketEstablished(int32_t, void *, unsigned long int buffer )
 {
-    EV << "X2AppClient: connected\n";
+    EV_TRACE << "X2AppClient: connected\n";
 }
 
 void X2AppClient::socketDataArrived(int32_t, void *, cPacket *msg, bool)
 {
     packetsRcvd++;
 
-    EV << "X2AppClient::socketDataArrived - Client received packet Nr " << packetsRcvd << " from SCTP\n";
+    EV_TRACE << "X2AppClient::socketDataArrived - Client received packet Nr " << packetsRcvd << " from SCTP\n";
     emit(rcvdPkSignal, msg);
     bytesRcvd += msg->getByteLength();
 
     SCTPSimpleMessage *smsg = check_and_cast<SCTPSimpleMessage*>(msg);
     if (smsg->getEncaps())
     {
-        EV << "X2AppClient::socketDataArrived - Forwarding packet to the X2 manager" << endl;
+        EV_TRACE << "X2AppClient::socketDataArrived - Forwarding packet to the X2 manager" << endl;
 
         // extract encapsulated packet
         cMessage* encapMsg = smsg->decapsulate();
@@ -70,7 +70,7 @@ void X2AppClient::socketDataArrived(int32_t, void *, cPacket *msg, bool)
     }
     else
     {
-        EV << "X2AppClient::socketDataArrived - No encapsulated message. Discard." << endl;
+        EV_TRACE << "X2AppClient::socketDataArrived - No encapsulated message. Discard." << endl;
 
         // TODO: throw exception?
 

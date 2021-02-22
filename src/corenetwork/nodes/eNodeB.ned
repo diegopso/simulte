@@ -85,13 +85,13 @@ module eNodeB
         lteNic: <nicType> like ILteNic {
             nodeType = nodeType;
             //d2dCapable = d2dCapable;
-            @display("p=250,407");
+            @display("p=252.55751,362.98752");
         }
-        
+
         pppIf: PPPInterface {
             @display("p=501,363");
         }
-        
+
         x2ppp[sizeof(x2)]: PPPInterface {
             @display("p=683,363");
         }

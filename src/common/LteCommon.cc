@@ -476,7 +476,7 @@ MacCid ctrlInfoToMacCid(LteControlInfo * info)
         default:
             throw cRuntimeError("ctrlInfoToMacCid(): unknown direction %d", dir);
     }
-    EV << "ctrlInfoToMacCid - dir[" << dir << "] - ueId[" << ueId << "] - lcid[" << lcid << "]" << endl;
+    EV_TRACE << "ctrlInfoToMacCid - dir[" << dir << "] - ueId[" << ueId << "] - lcid[" << lcid << "]" << endl;
     return idToMacCid(ueId, lcid);
 }
 
@@ -574,7 +574,7 @@ void getParametersFromXML(cXMLElement* xmlData, ParameterMap& outputMap)
         const char* value = (*it)->getAttribute("value");
         if (name == 0 || type == 0 || value == 0)
         {
-            EV << "Invalid parameter, could not find name, type or value." << endl;
+            EV_TRACE << "Invalid parameter, could not find name, type or value." << endl;
             continue;
         }
 
@@ -602,7 +602,7 @@ void getParametersFromXML(cXMLElement* xmlData, ParameterMap& outputMap)
         }
         else
         {
-            EV << "Unknown parameter type: \"" << sType << "\"" << endl;
+            EV_TRACE << "Unknown parameter type: \"" << sType << "\"" << endl;
             continue;
         }
 
@@ -628,7 +628,7 @@ void parseStringToIntArray(std::string str, int* values, int dim, int pad)
                 {
                     values[j] = pad;
                 }
-                EV << "parseStringToIntArray: Error: too few values in string array, padding with " << pad << endl;
+                EV_TRACE << "parseStringToIntArray: Error: too few values in string array, padding with " << pad << endl;
                 break;
             }
         }

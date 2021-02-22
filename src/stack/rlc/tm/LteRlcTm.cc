@@ -20,7 +20,7 @@ void LteRlcTm::handleUpperMessage(cPacket *pkt)
     rlcPduPkt->encapsulate(rlcSduPkt);
     rlcPduPkt->setControlInfo(lteInfo);
 
-    EV << "LteRlcTm : Sending packet " << rlcPduPkt->getName() << " to port TM_Sap_down$o\n";
+    EV_TRACE << "LteRlcTm : Sending packet " << rlcPduPkt->getName() << " to port TM_Sap_down$o\n";
     send(rlcPduPkt, down_[OUT]);
 }
 
@@ -33,7 +33,7 @@ void LteRlcTm::handleLowerMessage(cPacket *pkt)
     delete pkt;
     delete upPkt;
 
-    EV << "LteRlcTm : Sending packet " << upUpPkt->getName() << " to port TM_Sap_up$o\n";
+    EV_TRACE << "LteRlcTm : Sending packet " << upUpPkt->getName() << " to port TM_Sap_up$o\n";
     send(upUpPkt, up_[OUT]);
 }
 
@@ -52,7 +52,7 @@ void LteRlcTm::initialize()
 void LteRlcTm::handleMessage(cMessage* msg)
 {
     cPacket* pkt = check_and_cast<cPacket *>(msg);
-    EV << "LteRlcTm : Received packet " << pkt->getName() <<
+    EV_TRACE << "LteRlcTm : Received packet " << pkt->getName() <<
     " from port " << pkt->getArrivalGate()->getName() << endl;
 
     cGate* incoming = pkt->getArrivalGate();

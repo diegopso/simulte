@@ -20,7 +20,7 @@ Define_Module(LteBinder);
 
 void LteBinder::unregisterNode(MacNodeId id)
 {
-    EV << NOW << " LteBinder::unregisterNode - unregistering node " << id << endl;
+    EV_TRACE << NOW << " LteBinder::unregisterNode - unregistering node " << id << endl;
 
     if(nodeIds_.erase(id) != 1){
         EV_ERROR << "Cannot unregister node - node id \"" << id << "\" - not found";
@@ -59,7 +59,7 @@ MacNodeId LteBinder::registerNode(cModule *module, LteNodeType type,
         macNodeId = macNodeIdCounter_[0]++;
     }
 
-    EV << "LteBinder : Assigning to module " << module->getName()
+    EV_TRACE << "LteBinder : Assigning to module " << module->getName()
        << " with OmnetId: " << module->getId() << " and MacNodeId " << macNodeId
        << "\n";
 
@@ -84,7 +84,7 @@ MacNodeId LteBinder::registerNode(cModule *module, LteNodeType type,
 void LteBinder::registerNextHop(MacNodeId masterId, MacNodeId slaveId)
 {
     Enter_Method_Silent("registerNextHop");
-    EV << "LteBinder : Registering slave " << slaveId << " to master "
+    EV_TRACE << "LteBinder : Registering slave " << slaveId << " to master "
        << masterId << "\n";
 
     if (masterId != slaveId)
@@ -108,7 +108,7 @@ void LteBinder::initialize(int stage)
 void LteBinder::unregisterNextHop(MacNodeId masterId, MacNodeId slaveId)
 {
     Enter_Method_Silent("unregisterNextHop");
-    EV << "LteBinder : Unregistering slave " << slaveId << " from master "
+    EV_TRACE << "LteBinder : Unregistering slave " << slaveId << " from master "
        << masterId << "\n";
     dMap_[masterId][slaveId] = false;
 
@@ -292,14 +292,14 @@ bool LteBinder::checkD2DCapability(MacNodeId src, MacNodeId dst)
                 d2dPeeringMap_[src][dst] = IM;
             }
 
-            EV << "LteBinder::checkD2DCapability - UE " << src << " may transmit to UE " << dst << " using D2D (current mode " << ((d2dPeeringMap_[src][dst] == DM) ? "DM)" : "IM)") << endl;
+            EV_TRACE << "LteBinder::checkD2DCapability - UE " << src << " may transmit to UE " << dst << " using D2D (current mode " << ((d2dPeeringMap_[src][dst] == DM) ? "DM)" : "IM)") << endl;
 
             // this is a D2D-capable flow
             return true;
         }
         else
         {
-            EV << "LteBinder::checkD2DCapability - UE " << src << " may not transmit to UE " << dst << " using D2D (UE " << dst << " is not D2D capable)" << endl;
+            EV_TRACE << "LteBinder::checkD2DCapability - UE " << src << " may not transmit to UE " << dst << " using D2D (UE " << dst << " is not D2D capable)" << endl;
             // this is not a D2D-capable flow
             return false;
         }

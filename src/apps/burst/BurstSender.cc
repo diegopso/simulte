@@ -25,7 +25,7 @@ BurstSender::~BurstSender()
 void BurstSender::initialize(int stage)
 {
     cSimpleModule::initialize(stage);
-    EV << "BurstSender initialize: stage " << stage << " - initialize=" << initialized_ << endl;
+    EV_TRACE << "BurstSender initialize: stage " << stage << " - initialize=" << initialized_ << endl;
 
     if (stage == INITSTAGE_LOCAL)
     {
@@ -70,11 +70,11 @@ void BurstSender::initTraffic()
     if (destModule == NULL)
     {
         // this might happen when users are created dynamically
-        EV << simTime() << "BurstSender::initTraffic - destination " << destAddress << " not found" << endl;
+        EV_TRACE << simTime() << "BurstSender::initTraffic - destination " << destAddress << " not found" << endl;
 
         simtime_t offset = 0.01; // TODO check value
         scheduleAt(simTime()+offset, initTraffic_);
-        EV << simTime() << "BurstSender::initTraffic - the node will retry to initialize traffic in " << offset << " seconds " << endl;
+        EV_TRACE << simTime() << "BurstSender::initTraffic - the node will retry to initialize traffic in " << offset << " seconds " << endl;
     }
     else
     {
@@ -84,7 +84,7 @@ void BurstSender::initTraffic()
         socket.setOutputGate(gate("udpOut"));
         socket.bind(localPort_);
 
-        EV << simTime() << "BurstSender::initialize - binding to port: local:" << localPort_ << " , dest: " << destAddress_.str() << ":" << destPort_ << endl;
+        EV_TRACE << simTime() << "BurstSender::initialize - binding to port: local:" << localPort_ << " , dest: " << destAddress_.str() << ":" << destPort_ << endl;
 
         // calculating traffic starting time
         simtime_t startTime = par("startTime");
@@ -94,7 +94,7 @@ void BurstSender::initTraffic()
         simtime_t offset = (round(SIMTIME_DBL(startTime)*1000)/1000);
 
         scheduleAt(simTime()+startTime, selfBurst_);
-        EV << "\t starting traffic in " << startTime << " seconds " << endl;
+        EV_TRACE << "\t starting traffic in " << startTime << " seconds " << endl;
     }
 }
 
@@ -103,7 +103,7 @@ void BurstSender::sendBurst()
     idBurst_++;
     idFrame_ = 0;
 
-    EV << simTime() << " BurstSender::sendBurst - Start sending burst[" << idBurst_ << "]" << endl;
+    EV_TRACE << simTime() << " BurstSender::sendBurst - Start sending burst[" << idBurst_ << "]" << endl;
 
     // send first packet
     sendPacket();
@@ -114,7 +114,7 @@ void BurstSender::sendBurst()
 
 void BurstSender::sendPacket()
 {
-    EV << "BurstSender::sendPacket - Sending frame[" << idFrame_ << "] of burst [" << idBurst_ << "], next packet at "<< simTime() + intraBurstTime_ << endl;
+    EV_TRACE << "BurstSender::sendPacket - Sending frame[" << idFrame_ << "] of burst [" << idBurst_ << "], next packet at "<< simTime() + intraBurstTime_ << endl;
 
     //unsigned int msgId = (idBurst_ << 16) | idFrame_;
     unsigned int msgId = (idBurst_ * burstSize_) + idFrame_;

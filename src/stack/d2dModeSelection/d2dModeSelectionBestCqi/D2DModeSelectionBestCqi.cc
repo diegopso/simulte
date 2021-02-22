@@ -18,7 +18,7 @@ void D2DModeSelectionBestCqi::initialize(int stage)
 
 void D2DModeSelectionBestCqi::doModeSelection()
 {
-    EV << NOW << " D2DModeSelectionBestCqi::doModeSelection - Running Mode Selection algorithm..." << endl;
+    EV_TRACE << NOW << " D2DModeSelectionBestCqi::doModeSelection - Running Mode Selection algorithm..." << endl;
 
     switchList_.clear();
     std::map<MacNodeId, std::map<MacNodeId, LteD2DMode> >::iterator it = peeringModeMap_->begin();
@@ -52,7 +52,7 @@ void D2DModeSelectionBestCqi::doModeSelection()
             unsigned int bitsUl = mac_->getAmc()->computeBitsOnNRbs(srcId, 0, 0, 1, UL);
             unsigned int bitsD2D = mac_->getAmc()->computeBitsOnNRbs(srcId, 0, 0, 1, D2D);
 
-            EV << NOW << " D2DModeSelectionBestCqi::doModeSelection - bitsUl[" << bitsUl << "] bitsD2D[" << bitsD2D << "]" << endl;
+            EV_TRACE << NOW << " D2DModeSelectionBestCqi::doModeSelection - bitsUl[" << bitsUl << "] bitsD2D[" << bitsD2D << "]" << endl;
 
             // compare the bits in the two modes and select the best one
             LteD2DMode newMode = (bitsUl > bitsD2D) ? IM : DM;
@@ -70,7 +70,7 @@ void D2DModeSelectionBestCqi::doModeSelection()
                 // update peering map
                 jt->second = newMode;
 
-                EV << NOW << " D2DModeSelectionBestCqi::doModeSelection - Flow: " << srcId << " --> " << dstId << " [" << d2dModeToA(newMode) << "]" << endl;
+                EV_TRACE << NOW << " D2DModeSelectionBestCqi::doModeSelection - Flow: " << srcId << " --> " << dstId << " [" << d2dModeToA(newMode) << "]" << endl;
             }
         }
     }

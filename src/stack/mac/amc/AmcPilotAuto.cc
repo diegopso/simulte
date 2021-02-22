@@ -11,12 +11,12 @@
 
 const UserTxParams& AmcPilotAuto::computeTxParams(MacNodeId id, const Direction dir)
 {
-    EV << NOW << " AmcPilot" << getName() << "::computeTxParams for UE " << id << ", direction " << dirToA(dir) << endl;
+    EV_TRACE << NOW << " AmcPilot" << getName() << "::computeTxParams for UE " << id << ", direction " << dirToA(dir) << endl;
 
     // Check if user transmission parameters have been already allocated
     if(amc_->existTxParams(id, dir))
     {
-        EV << NOW << " AmcPilot" << getName() << "::computeTxParams The Information for this user have been already assigned \n";
+        EV_TRACE << NOW << " AmcPilot" << getName() << "::computeTxParams The Information for this user have been already assigned \n";
         return amc_->getTxParams(id, dir);
     }
 
@@ -71,7 +71,7 @@ const UserTxParams& AmcPilotAuto::computeTxParams(MacNodeId id, const Direction 
                     chosenCqi = s;
                 }
             }
-            EV << NOW <<" AmcPilotAuto::computeTxParams - no UsableBand available for this user." << endl;
+            EV_TRACE << NOW <<" AmcPilotAuto::computeTxParams - no UsableBand available for this user." << endl;
         }
         else
         {
@@ -91,7 +91,7 @@ const UserTxParams& AmcPilotAuto::computeTxParams(MacNodeId id, const Direction 
                     chosenCqi = s;
                 }
             }
-            EV << NOW <<" AmcPilotAuto::computeTxParams - UsableBand of size " << usableB->size() << " available for this user" << endl;
+            EV_TRACE << NOW <<" AmcPilotAuto::computeTxParams - UsableBand of size " << usableB->size() << " available for this user" << endl;
         }
     }
     else if(mode_ == MIN_CQI)
@@ -113,7 +113,7 @@ const UserTxParams& AmcPilotAuto::computeTxParams(MacNodeId id, const Direction 
                     chosenCqi = s;
                 }
             }
-            EV << NOW <<" AmcPilotAuto::computeTxParams - no UsableBand available for this user." << endl;
+            EV_TRACE << NOW <<" AmcPilotAuto::computeTxParams - no UsableBand available for this user." << endl;
         }
         else
         {
@@ -133,7 +133,7 @@ const UserTxParams& AmcPilotAuto::computeTxParams(MacNodeId id, const Direction 
                 }
             }
 
-            EV << NOW <<" AmcPilotAuto::computeTxParams - UsableBand of size " << usableB->size() << " available for this user" << endl;
+            EV_TRACE << NOW <<" AmcPilotAuto::computeTxParams - UsableBand of size " << usableB->size() << " available for this user" << endl;
         }
     }
 
@@ -152,7 +152,7 @@ const UserTxParams& AmcPilotAuto::computeTxParams(MacNodeId id, const Direction 
     info.writeAntennas(antennas);
 
     // DEBUG
-    EV << NOW << " AmcPilot" << getName() << "::computeTxParams NEW values assigned! - CQI =" << chosenCqi << "\n";
+    EV_TRACE << NOW << " AmcPilot" << getName() << "::computeTxParams NEW values assigned! - CQI =" << chosenCqi << "\n";
     info.print("AmcPilotAuto::computeTxParams");
 
     return amc_->setTxParams(id, dir, info);
@@ -160,7 +160,7 @@ const UserTxParams& AmcPilotAuto::computeTxParams(MacNodeId id, const Direction 
 
 std::vector<Cqi> AmcPilotAuto::getMultiBandCqi(MacNodeId id , const Direction dir)
 {
-    EV << NOW << " AmcPilot" << getName() << "::getMultiBandCqi for UE " << id << ", direction " << dirToA(dir) << endl;
+    EV_TRACE << NOW << " AmcPilot" << getName() << "::getMultiBandCqi for UE " << id << ", direction " << dirToA(dir) << endl;
 
     // TODO make it configurable from NED
     // default transmission mode
@@ -179,12 +179,12 @@ std::vector<Cqi> AmcPilotAuto::getMultiBandCqi(MacNodeId id , const Direction di
 
 void AmcPilotAuto::setUsableBands(MacNodeId id , UsableBands usableBands)
 {
-    EV << NOW << " AmcPilotAuto::setUsableBands - setting Usable bands: for node " << id<< " [" ;
+    EV_TRACE << NOW << " AmcPilotAuto::setUsableBands - setting Usable bands: for node " << id<< " [" ;
     for(int i = 0 ; i<usableBands.size() ; ++i)
     {
-        EV << usableBands[i] << ",";
+        EV_TRACE << usableBands[i] << ",";
     }
-    EV << "]"<<endl;
+    EV_TRACE << "]"<<endl;
     UsableBandsList::iterator it = usableBandsList_.find(id);
 
     // if usable bands for this node are already setm delete it (probably unnecessary)
@@ -195,7 +195,7 @@ void AmcPilotAuto::setUsableBands(MacNodeId id , UsableBands usableBands)
 
 bool AmcPilotAuto::getUsableBands(MacNodeId id, UsableBands*& uBands)
 {
-    EV << NOW << " AmcPilotAuto::getUsableBands - getting Usable bands for node " << id;
+    EV_TRACE << NOW << " AmcPilotAuto::getUsableBands - getting Usable bands for node " << id;
 
     bool found = false;
     UsableBandsList::iterator it = usableBandsList_.find(id);
@@ -219,17 +219,17 @@ bool AmcPilotAuto::getUsableBands(MacNodeId id, UsableBands*& uBands)
     if (found)
     {
         uBands = &(it->second);
-        EV << " [" ;
+        EV_TRACE << " [" ;
         for(unsigned int i = 0 ; i < it->second.size() ; ++i)
         {
-            EV << it->second[i] << ",";
+            EV_TRACE << it->second[i] << ",";
         }
-        EV << "]"<<endl;
+        EV_TRACE << "]"<<endl;
 
         return true;
     }
 
-    EV << " [All bands are usable]" << endl ;
+    EV_TRACE << " [All bands are usable]" << endl ;
     uBands = NULL;
     return false;
 }

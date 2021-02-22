@@ -37,7 +37,7 @@ UmTxEntity* LteRlcUmD2D::getTxBuffer(FlowControlInfo* lteInfo)
             txEnt->setFlowControlInfo(lteInfo->dup());
         }
 
-        EV << "LteRlcUmD2D : Added new UmTxEntity: " << txEnt->getId() <<
+        EV_TRACE << "LteRlcUmD2D : Added new UmTxEntity: " << txEnt->getId() <<
         " for node: " << nodeId << " for Lcid: " << lcid << "\n";
 
         // store per-peer map
@@ -53,7 +53,7 @@ UmTxEntity* LteRlcUmD2D::getTxBuffer(FlowControlInfo* lteInfo)
     else
     {
         // Found
-        EV << "LteRlcUmD2D : Using old UmTxBuffer: " << it->second->getId() <<
+        EV_TRACE << "LteRlcUmD2D : Using old UmTxBuffer: " << it->second->getId() <<
         " for node: " << nodeId << " for Lcid: " << lcid << "\n";
 
         return it->second;
@@ -64,7 +64,7 @@ void LteRlcUmD2D::handleLowerMessage(cPacket *pkt)
 {
     if (strcmp(pkt->getName(), "D2DModeSwitchNotification") == 0)
     {
-        EV << NOW << " LteRlcUmD2D::handleLowerMessage - Received packet " << pkt->getName() << " from lower layer\n";
+        EV_TRACE << NOW << " LteRlcUmD2D::handleLowerMessage - Received packet " << pkt->getName() << " from lower layer\n";
 
         // add here specific behavior for handling mode switch at the RLC layer
         D2DModeSwitchNotification* switchPkt = check_and_cast<D2DModeSwitchNotification*>(pkt);
@@ -77,7 +77,7 @@ void LteRlcUmD2D::handleLowerMessage(cPacket *pkt)
             txbuf->rlcHandleD2DModeSwitch(switchPkt->getOldConnection(), switchPkt->getClearRlcBuffer());
 
             // forward packet to PDCP
-            EV << "LteRlcUmD2D::handleLowerMessage - Sending packet " << pkt->getName() << " to port UM_Sap_up$o\n";
+            EV_TRACE << "LteRlcUmD2D::handleLowerMessage - Sending packet " << pkt->getName() << " to port UM_Sap_up$o\n";
             send(pkt, up_[OUT]);
         }
         else  // rx side
@@ -129,7 +129,7 @@ void LteRlcUmD2D::resumeDownstreamInPackets(MacNodeId peerId)
 
 bool LteRlcUmD2D::isEmptyingTxBuffer(MacNodeId peerId)
 {
-    EV << NOW << " LteRlcUmD2D::isEmptyingTxBuffer - peerId " << peerId << endl;
+    EV_TRACE << NOW << " LteRlcUmD2D::isEmptyingTxBuffer - peerId " << peerId << endl;
 
     if (peerId == 0 || (perPeerTxEntities_.find(peerId) == perPeerTxEntities_.end()))
         return false;
@@ -140,7 +140,7 @@ bool LteRlcUmD2D::isEmptyingTxBuffer(MacNodeId peerId)
     {
         if ((*it)->isEmptyingBuffer())
         {
-            EV << NOW << " LteRlcUmD2D::isEmptyingTxBuffer - found " << endl;
+            EV_TRACE << NOW << " LteRlcUmD2D::isEmptyingTxBuffer - found " << endl;
             return true;
         }
     }

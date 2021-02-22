@@ -39,7 +39,7 @@ void GtpUserSimplified::initialize(int stage)
 
 EpcNodeType GtpUserSimplified::selectOwnerType(const char * type)
 {
-    EV << "GtpUserSimplified::selectOwnerType - setting owner type to " << type << endl;
+    EV_TRACE << "GtpUserSimplified::selectOwnerType - setting owner type to " << type << endl;
     if(strcmp(type,"ENODEB") == 0)
         return ENB;
     if(strcmp(type,"PGW") != 0)
@@ -51,14 +51,14 @@ void GtpUserSimplified::handleMessage(cMessage *msg)
 {
     if (strcmp(msg->getArrivalGate()->getFullName(), "trafficFlowFilterGate") == 0)
     {
-        EV << "GtpUserSimplified::handleMessage - message from trafficFlowFilter" << endl;
+        EV_TRACE << "GtpUserSimplified::handleMessage - message from trafficFlowFilter" << endl;
         // obtain the encapsulated IPv4 datagram
         IPv4Datagram * datagram = check_and_cast<IPv4Datagram*>(msg);
         handleFromTrafficFlowFilter(datagram);
     }
     else if(strcmp(msg->getArrivalGate()->getFullName(),"udpIn")==0)
     {
-        EV << "GtpUserSimplified::handleMessage - message from udp layer" << endl;
+        EV_TRACE << "GtpUserSimplified::handleMessage - message from udp layer" << endl;
 
         GtpUserMsg * gtpMsg = check_and_cast<GtpUserMsg *>(msg);
         handleFromUdp(gtpMsg);
@@ -72,7 +72,7 @@ void GtpUserSimplified::handleFromTrafficFlowFilter(IPv4Datagram * datagram)
     TrafficFlowTemplateId flowId = tftInfo->getTft();
     delete (tftInfo);
 
-    EV << "GtpUserSimplified::handleFromTrafficFlowFilter - Received a tftMessage with flowId[" << flowId << "]" << endl;
+    EV_TRACE << "GtpUserSimplified::handleFromTrafficFlowFilter - Received a tftMessage with flowId[" << flowId << "]" << endl;
 
     // If we are on the eNB and the flowId represents the ID of this eNB, forward the packet locally
     if (flowId == 0)
@@ -107,7 +107,7 @@ void GtpUserSimplified::handleFromTrafficFlowFilter(IPv4Datagram * datagram)
 
 void GtpUserSimplified::handleFromUdp(GtpUserMsg * gtpMsg)
 {
-    EV << "GtpUserSimplified::handleFromUdp - Decapsulating datagram from GTP tunnel" << endl;
+    EV_TRACE << "GtpUserSimplified::handleFromUdp - Decapsulating datagram from GTP tunnel" << endl;
 
     // obtain the original IP datagram and send it to the local network
     IPv4Datagram * datagram = check_and_cast<IPv4Datagram*>(gtpMsg->decapsulate());
@@ -130,12 +130,12 @@ void GtpUserSimplified::handleFromUdp(GtpUserMsg * gtpMsg)
              const char* symbolicName = binder_->getModuleNameByMacNodeId(destMaster);
              L3Address tunnelPeerAddress = L3AddressResolver().resolve(symbolicName);
              socket_.sendTo(gtpMsg, tunnelPeerAddress, tunnelPeerPort_);
-             EV << "GtpUserSimplified::handleFromUdp - Destination is a MEC server. Sending GTP packet to " << symbolicName << endl;
+             EV_TRACE << "GtpUserSimplified::handleFromUdp - Destination is a MEC server. Sending GTP packet to " << symbolicName << endl;
         }
         else
         {
             // destination is outside the LTE network
-            EV << "GtpUserSimplified::handleFromUdp - Deliver datagram to the internet " << endl;
+            EV_TRACE << "GtpUserSimplified::handleFromUdp - Deliver datagram to the internet " << endl;
             send(datagram,"pppGate");
         }
     }
@@ -149,7 +149,7 @@ void GtpUserSimplified::handleFromUdp(GtpUserMsg * gtpMsg)
             MacNodeId destMaster = binder_->getNextHop(destId);
             if (destMaster == enbId)
             {
-                EV << "GtpUserSimplified::handleFromUdp - Deliver datagram to the LTE NIC " << endl;
+                EV_TRACE << "GtpUserSimplified::handleFromUdp - Deliver datagram to the LTE NIC " << endl;
                 send(datagram,"pppGate");
                 return;
             }
@@ -164,6 +164,6 @@ void GtpUserSimplified::handleFromUdp(GtpUserMsg * gtpMsg)
 
         socket_.sendTo(gtpMsg, pgwAddress_, tunnelPeerPort_);
 
-        EV << "GtpUserSimplified::handleFromUdp - Destination is not served by this eNodeB. Sending GTP packet to the PGW"<< endl;
+        EV_TRACE << "GtpUserSimplified::handleFromUdp - Destination is not served by this eNodeB. Sending GTP packet to the PGW"<< endl;
     }
 }

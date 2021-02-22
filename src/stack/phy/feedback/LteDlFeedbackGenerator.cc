@@ -24,7 +24,7 @@ Define_Module(LteDlFeedbackGenerator);
 
 void LteDlFeedbackGenerator::initialize(int stage)
 {
-    EV << "DlFeedbackGenerator stage: " << stage << endl;
+    EV_TRACE << "DlFeedbackGenerator stage: " << stage << endl;
     if (stage == 0)
     {
         // Read NED parameters
@@ -66,23 +66,23 @@ void LteDlFeedbackGenerator::initialize(int stage)
     }
     else if (stage == 1)
     {
-        EV << "DLFeedbackGenerator Stage " << stage << " nodeid: " << nodeId_
+        EV_TRACE << "DLFeedbackGenerator Stage " << stage << " nodeid: " << nodeId_
            << " init" << endl;
         cellInfo_ = getCellInfo(masterId_);
-        EV << "DLFeedbackGenerator Stage " << stage << " nodeid: " << nodeId_
+        EV_TRACE << "DLFeedbackGenerator Stage " << stage << " nodeid: " << nodeId_
            << " cellInfo taken" << endl;
         antennaCws_ = cellInfo_->getAntennaCws();
         numBands_ = cellInfo_->getNumBands();
         numPreferredBands_ = cellInfo_->getNumPreferredBands();
-        EV << "DLFeedbackGenerator Stage " << stage << " nodeid: " << nodeId_
+        EV_TRACE << "DLFeedbackGenerator Stage " << stage << " nodeid: " << nodeId_
            << " used cellInfo: bands " << numBands_ << " preferred bands "
            << numPreferredBands_ << endl;
         LtePhyUe* tmp = dynamic_cast<LtePhyUe*>(getParentModule()->getSubmodule(
                 "phy"));
-        EV << "DLFeedbackGenerator Stage " << stage << " nodeid: " << nodeId_
+        EV_TRACE << "DLFeedbackGenerator Stage " << stage << " nodeid: " << nodeId_
            << " phyUe taken" << endl;
         dasFilter_ = tmp->getDasFilter();
-        EV << "DLFeedbackGenerator Stage " << stage << " nodeid: " << nodeId_
+        EV_TRACE << "DLFeedbackGenerator Stage " << stage << " nodeid: " << nodeId_
            << " phyUe used" << endl;
 //        initializeFeedbackComputation(par("feedbackComputation").xmlValue());
 
@@ -90,7 +90,7 @@ void LteDlFeedbackGenerator::initialize(int stage)
         // TODO: remove this parameter
         feedbackComputationPisa_ = true;
 
-        EV << "DLFeedbackGenerator Stage " << stage << " nodeid: " << nodeId_
+        EV_TRACE << "DLFeedbackGenerator Stage " << stage << " nodeid: " << nodeId_
            << " feedback computation initialize" << endl;
         WATCH(numBands_);
         WATCH(numPreferredBands_);
@@ -108,20 +108,20 @@ void LteDlFeedbackGenerator::handleMessage(cMessage *msg)
 
     if (type == PERIODIC_SENSING)
     {
-        EV << NOW << " Periodic Sensing" << endl;
+        EV_TRACE << NOW << " Periodic Sensing" << endl;
         tPeriodicSensing_->handle();
         tPeriodicSensing_->start(fbPeriod_);
         sensing(PERIODIC);
     }
     else if (type == PERIODIC_TX)
     {
-        EV << NOW << " Periodic Tx" << endl;
+        EV_TRACE << NOW << " Periodic Tx" << endl;
         tPeriodicTx_->handle();
         sendFeedback(periodicFeedback, PERIODIC);
     }
     else if (type == APERIODIC_TX)
     {
-        EV << NOW << " Aperiodic Tx" << endl;
+        EV_TRACE << NOW << " Aperiodic Tx" << endl;
         tAperiodicTx_->handle();
         sendFeedback(aperiodicFeedback, APERIODIC);
     }
@@ -137,7 +137,7 @@ void LteDlFeedbackGenerator::sensing(FbPeriodicity per)
          * (an APERIODIC tx is scheduled).
          * Ignore this PERIODIC request.
          */
-        EV << NOW << " Aperiodic before Periodic in the same TTI: ignore Periodic" << endl;
+        EV_TRACE << NOW << " Aperiodic before Periodic in the same TTI: ignore Periodic" << endl;
         return;
     }
 
@@ -146,7 +146,7 @@ void LteDlFeedbackGenerator::sensing(FbPeriodicity per)
         /* An APERIODIC tx is already scheduled:
          * ignore this request.
          */
-        EV << NOW << " Aperiodic overlapping: ignore second Aperiodic" << endl;
+        EV_TRACE << NOW << " Aperiodic overlapping: ignore second Aperiodic" << endl;
         return;
     }
 
@@ -156,7 +156,7 @@ void LteDlFeedbackGenerator::sensing(FbPeriodicity per)
         /* In this TTI a PERIODIC sensing has been done.
          * Deschedule the PERIODIC tx and continue with APERIODIC.
          */
-        EV << NOW << " Periodic before Aperiodic in the same TTI: remove Periodic" << endl;
+        EV_TRACE << NOW << " Periodic before Aperiodic in the same TTI: remove Periodic" << endl;
         tPeriodicTx_->stop();
     }
 
@@ -188,7 +188,7 @@ LteDlFeedbackGenerator::~LteDlFeedbackGenerator()
 void LteDlFeedbackGenerator::aperiodicRequest()
 {
     Enter_Method("aperiodicRequest()");
-    EV << NOW << " Aperiodic request" << endl;
+    EV_TRACE << NOW << " Aperiodic request" << endl;
     sensing(APERIODIC);
 }
 
@@ -201,8 +201,8 @@ void LteDlFeedbackGenerator::setTxMode(TxMode newTxMode)
 void LteDlFeedbackGenerator::sendFeedback(LteFeedbackDoubleVector fb,
     FbPeriodicity per)
 {
-    EV << "sendFeedback() in DL" << endl;
-    EV << "Periodicity: " << periodicityToA(per) << " nodeId: " << nodeId_ << endl;
+    EV_TRACE << "sendFeedback() in DL" << endl;
+    EV_TRACE << "Periodicity: " << periodicityToA(per) << " nodeId: " << nodeId_ << endl;
 
     FeedbackRequest feedbackReq;
     if (feedbackComputationPisa_)
@@ -243,5 +243,5 @@ void LteDlFeedbackGenerator::handleHandover(MacCellId newEnbId)
     masterId_ = newEnbId;
     cellInfo_ = getCellInfo(masterId_);
 
-    EV << NOW << " LteDlFeedbackGenerator::handleHandover - Master ID updated to " << masterId_ << endl;
+    EV_TRACE << NOW << " LteDlFeedbackGenerator::handleHandover - Master ID updated to " << masterId_ << endl;
 }

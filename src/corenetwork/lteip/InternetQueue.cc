@@ -58,14 +58,14 @@ void InternetQueue::handleMessage(cMessage *msg)
 
         if (!connected)
         {
-            EV << "Queue is not connected, dropping packet " << msg << endl;
+            EV_TRACE << "Queue is not connected, dropping packet " << msg << endl;
             delete msg;
             numDropped_++;
         }
         else
         {
-            EV << "Queue size: " << queueSize_ << endl;
-            EV << "Queue connected: " << connected << endl;
+            EV_TRACE << "Queue size: " << queueSize_ << endl;
+            EV_TRACE << "Queue connected: " << connected << endl;
         }
     }
 
@@ -74,7 +74,7 @@ void InternetQueue::handleMessage(cMessage *msg)
     {
         // Transmission finished, we can start next one.
         numSent_++;
-        EV << "Transmission finished" << endl;
+        EV_TRACE << "Transmission finished" << endl;
         if (!txQueue_.isEmpty())
         {
             cPacket *pk = (cPacket *) txQueue_.pop();
@@ -88,13 +88,13 @@ void InternetQueue::handleMessage(cMessage *msg)
         if (endTransmissionEvent_->isScheduled())
         {
             // We are currently busy, so just queue up the packet
-            EV << "Received " << msg
+            EV_TRACE << "Received " << msg
                << " for transmission but transmitter busy, queuing." << endl;
 
             // if the queue has a finite length and it is full, drop the packet
             if (queueSize_ && txQueue_.getLength() >= queueSize_)
             {
-                EV << "The transmission queue is full. Packet dropped" << endl;
+                EV_TRACE << "The transmission queue is full. Packet dropped" << endl;
                 numDropped_++;
                 delete msg;
             }
@@ -104,7 +104,7 @@ void InternetQueue::handleMessage(cMessage *msg)
         else
         {
             // We are idle, so we can start transmitting right away.
-            EV << "Received " << msg << " for transmission\n";
+            EV_TRACE << "Received " << msg << " for transmission\n";
             startTransmitting(check_and_cast<cPacket *>(msg));
         }
     }
@@ -116,14 +116,14 @@ void InternetQueue::handleMessage(cMessage *msg)
 void InternetQueue::startTransmitting(cPacket *pkt)
 {
     // Send
-    EV << "Starting transmission of " << pkt << endl;
+    EV_TRACE << "Starting transmission of " << pkt << endl;
     send(pkt, queueOutGate_);
 
     // Schedule an event for the time when last bit will leave the gate.
     simtime_t endTransmissionTime =
     datarateChannel_->getTransmissionFinishTime();
     scheduleAt(endTransmissionTime, endTransmissionEvent_);
-    EV << "The transmission will finish at simtime: " << endTransmissionTime << endl;
+    EV_TRACE << "The transmission will finish at simtime: " << endTransmissionTime << endl;
 }
 
 void InternetQueue::updateDisplayString()

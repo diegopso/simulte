@@ -79,7 +79,7 @@ void LteX2Manager::handleMessage(cMessage *msg)
     if (strcmp(incoming->getBaseName(), "dataPort") == 0)
     {
         // incoming data from LTE stack
-        EV << "LteX2Manager::handleMessage - Received message from LTE stack" << endl;
+        EV_TRACE << "LteX2Manager::handleMessage - Received message from LTE stack" << endl;
 
         fromStack(pkt);
     }
@@ -89,7 +89,7 @@ void LteX2Manager::handleMessage(cMessage *msg)
         int gateIndex = incoming->getIndex();
 
         // incoming data from X2
-        EV << "LteX2Manager::handleMessage - Received message from X2, gate " << gateIndex << endl;
+        EV_TRACE << "LteX2Manager::handleMessage - Received message from X2, gate " << gateIndex << endl;
 
         // call handler
         fromX2(pkt);
@@ -160,7 +160,7 @@ void LteX2Manager::fromX2(cPacket* pkt)
 
     if (msgType == X2_UNKNOWN_MSG)
     {
-        EV << " LteX2Manager::fromX2 - Unknown type of the X2 message. Discard." << endl;
+        EV_TRACE << " LteX2Manager::fromX2 - Unknown type of the X2 message. Discard." << endl;
         return;
     }
 
@@ -169,6 +169,6 @@ void LteX2Manager::fromX2(cPacket* pkt)
     cGate* outGate = gate(DATAPORT_OUT, gateIndex);
 
     // send X2 msg to stack
-    EV << "LteX2Manager::fromX2 - send X2MSG to LTE stack" << endl;
+    EV_TRACE << "LteX2Manager::fromX2 - send X2MSG to LTE stack" << endl;
     send(PK(x2msg), outGate);
 }

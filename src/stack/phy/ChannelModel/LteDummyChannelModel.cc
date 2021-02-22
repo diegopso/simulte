@@ -77,13 +77,13 @@ bool LteDummyChannelModel::isCorrupted(LteAirFrame *frame, UserControlInfo* lteI
 
    if (er <= totalPer)
    {
-       EV << "This is NOT your lucky day (" << er << " < " << totalPer
+       EV_TRACE << "This is NOT your lucky day (" << er << " < " << totalPer
           << ") -> do not receive." << endl;
        // Signal too weak, we can't receive it
        return false;
    }
        // Signal is strong enough, receive this Signal
-   EV << "This is your lucky day (" << er << " > " << totalPer
+   EV_TRACE << "This is your lucky day (" << er << " > " << totalPer
       << ") -> Receive AirFrame." << endl;
    return true;
 }
@@ -104,13 +104,13 @@ bool LteDummyChannelModel::error_D2D(LteAirFrame *frame, UserControlInfo* lteInf
 
    if (er <= totalPer)
    {
-       EV << "This is NOT your lucky day (" << er << " < " << totalPer
+       EV_TRACE << "This is NOT your lucky day (" << er << " < " << totalPer
           << ") -> do not receive." << endl;
        // Signal too weak, we can't receive it
        return false;
    }
        // Signal is strong enough, receive this Signal
-   EV << "This is your lucky day (" << er << " > " << totalPer
+   EV_TRACE << "This is your lucky day (" << er << " > " << totalPer
       << ") -> Receive AirFrame." << endl;
    return true;
 }

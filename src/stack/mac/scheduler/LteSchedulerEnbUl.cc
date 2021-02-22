@@ -41,7 +41,7 @@ LteSchedulerEnbUl::checkEligibility(MacNodeId id, Codeword& cw)
 void
 LteSchedulerEnbUl::updateHarqDescs()
 {
-    EV << NOW << "LteSchedulerEnbUl::updateHarqDescs  cell " << mac_->getMacCellId() << endl;
+    EV_TRACE << NOW << "LteSchedulerEnbUl::updateHarqDescs  cell " << mac_->getMacCellId() << endl;
 
     HarqRxBuffers::iterator it;
     HarqStatus::iterator currentStatus;
@@ -50,15 +50,15 @@ LteSchedulerEnbUl::updateHarqDescs()
     {
         if ((currentStatus=harqStatus_.find(it->first)) != harqStatus_.end())
         {
-            EV << NOW << "LteSchedulerEnbUl::updateHarqDescs UE " << it->first << " OLD Current Process is  " << (unsigned int)currentStatus->second << endl;
+            EV_TRACE << NOW << "LteSchedulerEnbUl::updateHarqDescs UE " << it->first << " OLD Current Process is  " << (unsigned int)currentStatus->second << endl;
             // updating current acid id
             currentStatus->second = (currentStatus->second +1 ) % (it->second->getProcesses());
 
-            EV << NOW << "LteSchedulerEnbUl::updateHarqDescs UE " << it->first << "NEW Current Process is " << (unsigned int)currentStatus->second << "(total harq processes " << it->second->getProcesses() << ")" << endl;
+            EV_TRACE << NOW << "LteSchedulerEnbUl::updateHarqDescs UE " << it->first << "NEW Current Process is " << (unsigned int)currentStatus->second << "(total harq processes " << it->second->getProcesses() << ")" << endl;
         }
         else
         {
-            EV << NOW << "LteSchedulerEnbUl::updateHarqDescs UE " << it->first << " initialized the H-ARQ status " << endl;
+            EV_TRACE << NOW << "LteSchedulerEnbUl::updateHarqDescs UE " << it->first << " initialized the H-ARQ status " << endl;
             harqStatus_[it->first]=0;
         }
     }
@@ -66,9 +66,9 @@ LteSchedulerEnbUl::updateHarqDescs()
 
 bool LteSchedulerEnbUl::racschedule()
 {
-    EV << NOW << " LteSchedulerEnbUl::racschedule --------------------::[ START RAC-SCHEDULE ]::--------------------" << endl;
-    EV << NOW << " LteSchedulerEnbUl::racschedule eNodeB: " << mac_->getMacCellId() << endl;
-    EV << NOW << " LteSchedulerEnbUl::racschedule Direction: " << (direction_ == UL ? "UL" : "DL") << endl;
+    EV_TRACE << NOW << " LteSchedulerEnbUl::racschedule --------------------::[ START RAC-SCHEDULE ]::--------------------" << endl;
+    EV_TRACE << NOW << " LteSchedulerEnbUl::racschedule eNodeB: " << mac_->getMacCellId() << endl;
+    EV_TRACE << NOW << " LteSchedulerEnbUl::racschedule Direction: " << (direction_ == UL ? "UL" : "DL") << endl;
 
     RacStatus::iterator it=racStatus_.begin() , et=racStatus_.end();
 
@@ -76,7 +76,7 @@ bool LteSchedulerEnbUl::racschedule()
     {
         // get current nodeId
         MacNodeId nodeId = it->first;
-        EV << NOW << " LteSchedulerEnbUl::racschedule handling RAC for node " << nodeId << endl;
+        EV_TRACE << NOW << " LteSchedulerEnbUl::racschedule handling RAC for node " << nodeId << endl;
 
         // Get number of logical bands
         unsigned int numBands = mac_->getCellInfo()->getNumBands();
@@ -98,7 +98,7 @@ bool LteSchedulerEnbUl::racschedule()
                 {
                     allocator_->addBlocks(MACRO,b,nodeId,1,bytes);
 
-                    EV << NOW << "LteSchedulerEnbUl::racschedule UE: " << nodeId << "Handled RAC on band: " << b << endl;
+                    EV_TRACE << NOW << "LteSchedulerEnbUl::racschedule UE: " << nodeId << "Handled RAC on band: " << b << endl;
 
                     allocation=true;
                     break;
@@ -119,7 +119,7 @@ bool LteSchedulerEnbUl::racschedule()
     // clean up all requests
     racStatus_.clear();
 
-    EV << NOW << " LteSchedulerEnbUl::racschedule --------------------::[  END RAC-SCHEDULE  ]::--------------------" << endl;
+    EV_TRACE << NOW << " LteSchedulerEnbUl::racschedule --------------------::[  END RAC-SCHEDULE  ]::--------------------" << endl;
 
     int availableBlocks = allocator_->computeTotalRbs();
 
@@ -135,9 +135,9 @@ LteSchedulerEnbUl::rtxschedule()
 
     try
     {
-        EV << NOW << " LteSchedulerEnbUl::rtxschedule --------------------::[ START RTX-SCHEDULE ]::--------------------" << endl;
-        EV << NOW << " LteSchedulerEnbUl::rtxschedule eNodeB: " << mac_->getMacCellId() << endl;
-        EV << NOW << " LteSchedulerEnbUl::rtxschedule Direction: " << (direction_ == UL ? "UL" : "DL") << endl;
+        EV_TRACE << NOW << " LteSchedulerEnbUl::rtxschedule --------------------::[ START RTX-SCHEDULE ]::--------------------" << endl;
+        EV_TRACE << NOW << " LteSchedulerEnbUl::rtxschedule eNodeB: " << mac_->getMacCellId() << endl;
+        EV_TRACE << NOW << " LteSchedulerEnbUl::rtxschedule Direction: " << (direction_ == UL ? "UL" : "DL") << endl;
 
         HarqRxBuffers::iterator it= harqRxBuffers_->begin() , et=harqRxBuffers_->end();
 
@@ -154,6 +154,17 @@ LteSchedulerEnbUl::rtxschedule()
             OmnetId id = binder_->getOmnetId(nodeId);
             if(id == 0){
                 harqRxBuffers_->erase(nodeId);
+                continue;
+            }
+
+            MacNodeId masterId = binder_->getNextHop(nodeId);
+            MacNodeId myId = mac_->getMacNodeId();
+            if (masterId != myId) {
+                // UE went away
+//                harqRxBuffers_->erase(nodeId);
+//                if (it == et) {
+//                    break;
+//                }
                 continue;
             }
 
@@ -177,7 +188,7 @@ LteSchedulerEnbUl::rtxschedule()
             if (skip)
                 continue;
 
-            EV << NOW << "LteSchedulerEnbUl::rtxschedule UE: " << nodeId << "Acid: " << (unsigned int)currentAcid << endl;
+            EV_TRACE << NOW << "LteSchedulerEnbUl::rtxschedule UE: " << nodeId << "Acid: " << (unsigned int)currentAcid << endl;
 
             // Get user transmission parameters
             const UserTxParams& txParams = mac_->getAmc()->computeTxParams(nodeId, direction_);// get the user info
@@ -200,7 +211,7 @@ LteSchedulerEnbUl::rtxschedule()
                     allocatedBytes+=rtxBytes;
                 }
             }
-            EV << NOW << "LteSchedulerEnbUl::rtxschedule user " << nodeId << " allocated bytes : " << allocatedBytes << endl;
+            EV_TRACE << NOW << "LteSchedulerEnbUl::rtxschedule user " << nodeId << " allocated bytes : " << allocatedBytes << endl;
         }
 
         if (mac_->isD2DCapable())
@@ -236,7 +247,7 @@ LteSchedulerEnbUl::rtxschedule()
                 if (skip)
                     continue;
 
-                EV << NOW << " LteSchedulerEnbUl::rtxschedule - D2D UE: " << senderId << " Acid: " << (unsigned int)currentAcid << endl;
+                EV_TRACE << NOW << " LteSchedulerEnbUl::rtxschedule - D2D UE: " << senderId << " Acid: " << (unsigned int)currentAcid << endl;
 
                 // Get user transmission parameters
                 const UserTxParams& txParams = mac_->getAmc()->computeTxParams(senderId, dir);// get the user info
@@ -259,7 +270,7 @@ LteSchedulerEnbUl::rtxschedule()
                         allocatedBytes+=rtxBytes;
                     }
                 }
-                EV << NOW << " LteSchedulerEnbUl::rtxschedule - D2D UE: " << senderId << " allocated bytes : " << allocatedBytes << endl;
+                EV_TRACE << NOW << " LteSchedulerEnbUl::rtxschedule - D2D UE: " << senderId << " allocated bytes : " << allocatedBytes << endl;
 
             }
             // --- END Schedule D2D retransmissions --- //
@@ -267,9 +278,9 @@ LteSchedulerEnbUl::rtxschedule()
 
         int availableBlocks = allocator_->computeTotalRbs();
 
-        EV << NOW << " LteSchedulerEnbUl::rtxschedule residual OFDM Space: " << availableBlocks << endl;
+        EV_TRACE << NOW << " LteSchedulerEnbUl::rtxschedule residual OFDM Space: " << availableBlocks << endl;
 
-        EV << NOW << " LteSchedulerEnbUl::rtxschedule --------------------::[  END RTX-SCHEDULE  ]::--------------------" << endl;
+        EV_TRACE << NOW << " LteSchedulerEnbUl::rtxschedule --------------------::[  END RTX-SCHEDULE  ]::--------------------" << endl;
 
         return (availableBlocks == 0);
     }
@@ -301,7 +312,7 @@ LteSchedulerEnbUl::schedulePerAcidRtx(MacNodeId nodeId, Codeword cw, unsigned ch
                 BandLimit elem;
                 // copy the band
                 elem.band_ = Band(i);
-                EV << "Putting band " << i << endl;
+                EV_TRACE << "Putting band " << i << endl;
                 // mark as unlimited
                 for (Codeword i = 0; i < MAX_CODEWORDS; ++i)
                 {
@@ -311,18 +322,18 @@ LteSchedulerEnbUl::schedulePerAcidRtx(MacNodeId nodeId, Codeword cw, unsigned ch
             }
         }
 
-        EV << NOW << "LteSchedulerEnbUl::rtxAcid - Node[" << mac_->getMacNodeId() << ", User[" << nodeId << ", Codeword[ " << cw << "], ACID[" << (unsigned int)acid << "] " << endl;
+        EV_TRACE << NOW << "LteSchedulerEnbUl::rtxAcid - Node[" << mac_->getMacNodeId() << ", User[" << nodeId << ", Codeword[ " << cw << "], ACID[" << (unsigned int)acid << "] " << endl;
 
         // Get the current active HARQ process
 //        unsigned char currentAcid = harqStatus_.at(nodeId) ;
 
         unsigned char currentAcid = (harqStatus_.at(nodeId) + 2) % (harqRxBuffers_->at(nodeId)->getProcesses());
-        EV << "\t the acid that should be considered is " << currentAcid << endl;
+        EV_TRACE << "\t the acid that should be considered is " << currentAcid << endl;
 
         // acid e currentAcid sono identici per forza, dato che sono calcolati nello stesso modo
 //        if(acid != currentAcid)
 //        {        // If requested HARQ process is not current for TTI
-//            EV << NOW << " LteSchedulerEnbUl::rtxAcid User is on ACID " << (unsigned int)currentAcid << " while requested one is " << (unsigned int)acid << ". No RTX scheduled. " << endl;
+//            EV_TRACE << NOW << " LteSchedulerEnbUl::rtxAcid User is on ACID " << (unsigned int)currentAcid << " while requested one is " << (unsigned int)acid << ". No RTX scheduled. " << endl;
 //            return 0;
 //        }
 
@@ -331,7 +342,7 @@ LteSchedulerEnbUl::schedulePerAcidRtx(MacNodeId nodeId, Codeword cw, unsigned ch
         if (currentProcess->getUnitStatus(cw) != RXHARQ_PDU_CORRUPTED)
         {
             // exit if the current active HARQ process is not ready for retransmission
-            EV << NOW << " LteSchedulerEnbUl::rtxAcid User is on ACID " << (unsigned int)currentAcid << " HARQ process is IDLE. No RTX scheduled ." << endl;
+            EV_TRACE << NOW << " LteSchedulerEnbUl::rtxAcid User is on ACID " << (unsigned int)currentAcid << " HARQ process is IDLE. No RTX scheduled ." << endl;
             delete(bandLim);
             return 0;
         }
@@ -373,9 +384,9 @@ LteSchedulerEnbUl::schedulePerAcidRtx(MacNodeId nodeId, Codeword cw, unsigned ch
             if (limit >= 0)
                 bandAvailableBytes = limit < (int) bandAvailableBytes ? limit : bandAvailableBytes;
 
-            EV << NOW << " LteSchedulerEnbUl::rtxAcid BAND " << b << endl;
-            EV << NOW << " LteSchedulerEnbUl::rtxAcid total bytes:" << bytes << " still to serve: " << toServe << " bytes" << endl;
-            EV << NOW << " LteSchedulerEnbUl::rtxAcid Available: " << bandAvailableBytes << " bytes" << endl;
+            EV_TRACE << NOW << " LteSchedulerEnbUl::rtxAcid BAND " << b << endl;
+            EV_TRACE << NOW << " LteSchedulerEnbUl::rtxAcid total bytes:" << bytes << " still to serve: " << toServe << " bytes" << endl;
+            EV_TRACE << NOW << " LteSchedulerEnbUl::rtxAcid Available: " << bandAvailableBytes << " bytes" << endl;
 
             unsigned int servedBytes = 0;
             // there's no room on current band for serving the entire request
@@ -403,7 +414,7 @@ LteSchedulerEnbUl::schedulePerAcidRtx(MacNodeId nodeId, Codeword cw, unsigned ch
         if (toServe > 0)
         {
             // process couldn't be served - no sufficient space on available bands
-            EV << NOW << " LteSchedulerEnbUl::rtxAcid Unavailable space for serving node " << nodeId << " ,HARQ Process " << (unsigned int)currentAcid << " on codeword " << cw << endl;
+            EV_TRACE << NOW << " LteSchedulerEnbUl::rtxAcid Unavailable space for serving node " << nodeId << " ,HARQ Process " << (unsigned int)currentAcid << " on codeword " << cw << endl;
             delete(bandLim);
             return 0;
         }
@@ -422,11 +433,11 @@ LteSchedulerEnbUl::schedulePerAcidRtx(MacNodeId nodeId, Codeword cw, unsigned ch
                 Band b = bandLim->at(i).band_;
 
                 cwAllocatedBlocks +=assignedBlocks.at(i);
-                EV << "\t Cw->" << allocatedCw << "/" << MAX_CODEWORDS << endl;
+                EV_TRACE << "\t Cw->" << allocatedCw << "/" << MAX_CODEWORDS << endl;
                 //! handle multi-codeword allocation
                 if (allocatedCw!=MAX_CODEWORDS)
                 {
-                    EV << NOW << " LteSchedulerEnbUl::rtxAcid - adding " << assignedBlocks.at(i) << " to band " << i << endl;
+                    EV_TRACE << NOW << " LteSchedulerEnbUl::rtxAcid - adding " << assignedBlocks.at(i) << " to band " << i << endl;
                     allocator_->addBlocks(antenna,b,nodeId,assignedBlocks.at(i),assignedBytes.at(i));
                 }
                 //! TODO check if ok bandLim->at.limit_.at(cw) = assignedBytes.at(i);
@@ -446,7 +457,7 @@ LteSchedulerEnbUl::schedulePerAcidRtx(MacNodeId nodeId, Codeword cw, unsigned ch
                 allocatedCws_[nodeId]=1;
             }
 
-            EV << NOW << " LteSchedulerEnbUl::rtxAcid HARQ Process " << (unsigned int)currentAcid << " : " << bytes << " bytes served! " << endl;
+            EV_TRACE << NOW << " LteSchedulerEnbUl::rtxAcid HARQ Process " << (unsigned int)currentAcid << " : " << bytes << " bytes served! " << endl;
 
             delete(bandLim);
             return bytes;
@@ -482,7 +493,7 @@ LteSchedulerEnbUl::schedulePerAcidRtxD2D(MacNodeId destId,MacNodeId senderId, Co
                 BandLimit elem;
                 // copy the band
                 elem.band_ = Band(i);
-                EV << "Putting band " << i << endl;
+                EV_TRACE << "Putting band " << i << endl;
                 // mark as unlimited
                 for (Codeword i = 0; i < MAX_CODEWORDS; ++i)
                 {
@@ -492,20 +503,20 @@ LteSchedulerEnbUl::schedulePerAcidRtxD2D(MacNodeId destId,MacNodeId senderId, Co
             }
         }
 
-        EV << NOW << "LteSchedulerEnbUl::schedulePerAcidRtxD2D - Node[" << mac_->getMacNodeId() << ", User[" << senderId << ", Codeword[ " << cw << "], ACID[" << (unsigned int)acid << "] " << endl;
+        EV_TRACE << NOW << "LteSchedulerEnbUl::schedulePerAcidRtxD2D - Node[" << mac_->getMacNodeId() << ", User[" << senderId << ", Codeword[ " << cw << "], ACID[" << (unsigned int)acid << "] " << endl;
 
         D2DPair pair(senderId, destId);
 
         // Get the current active HARQ process
         HarqBuffersMirrorD2D* harqBuffersMirrorD2D = check_and_cast<LteMacEnbD2D*>(mac_)->getHarqBuffersMirrorD2D();
         unsigned char currentAcid = (harqStatus_.at(senderId) + 2) % (harqBuffersMirrorD2D->at(pair)->getProcesses());
-        EV << "\t the acid that should be considered is " << (unsigned int)currentAcid << endl;
+        EV_TRACE << "\t the acid that should be considered is " << (unsigned int)currentAcid << endl;
 
         LteHarqProcessMirrorD2D* currentProcess = harqBuffersMirrorD2D->at(pair)->getProcess(currentAcid);
         if (currentProcess->getUnitStatus(cw) != TXHARQ_PDU_BUFFERED)
         {
             // exit if the current active HARQ process is not ready for retransmission
-            EV << NOW << " LteSchedulerEnbUl::schedulePerAcidRtxD2D User is on ACID " << (unsigned int)currentAcid << " HARQ process is IDLE. No RTX scheduled ." << endl;
+            EV_TRACE << NOW << " LteSchedulerEnbUl::schedulePerAcidRtxD2D User is on ACID " << (unsigned int)currentAcid << " HARQ process is IDLE. No RTX scheduled ." << endl;
 
             delete(bandLim);
             return 0;
@@ -548,9 +559,9 @@ LteSchedulerEnbUl::schedulePerAcidRtxD2D(MacNodeId destId,MacNodeId senderId, Co
             if (limit >= 0)
                 bandAvailableBytes = limit < (int) bandAvailableBytes ? limit : bandAvailableBytes;
 
-            EV << NOW << " LteSchedulerEnbUl::schedulePerAcidRtxD2D BAND " << b << endl;
-            EV << NOW << " LteSchedulerEnbUl::schedulePerAcidRtxD2D total bytes:" << bytes << " still to serve: " << toServe << " bytes" << endl;
-            EV << NOW << " LteSchedulerEnbUl::schedulePerAcidRtxD2D Available: " << bandAvailableBytes << " bytes" << endl;
+            EV_TRACE << NOW << " LteSchedulerEnbUl::schedulePerAcidRtxD2D BAND " << b << endl;
+            EV_TRACE << NOW << " LteSchedulerEnbUl::schedulePerAcidRtxD2D total bytes:" << bytes << " still to serve: " << toServe << " bytes" << endl;
+            EV_TRACE << NOW << " LteSchedulerEnbUl::schedulePerAcidRtxD2D Available: " << bandAvailableBytes << " bytes" << endl;
 
             unsigned int servedBytes = 0;
             // there's no room on current band for serving the entire request
@@ -566,7 +577,7 @@ LteSchedulerEnbUl::schedulePerAcidRtxD2D(MacNodeId destId,MacNodeId senderId, Co
                 servedBytes = toServe;
                 // signal end loop - all data have been serviced
                 finish = true;
-                EV << NOW << " LteSchedulerEnbUl::schedulePerAcidRtxD2D ALL DATA HAVE BEEN SERVICED"<< endl;
+                EV_TRACE << NOW << " LteSchedulerEnbUl::schedulePerAcidRtxD2D ALL DATA HAVE BEEN SERVICED"<< endl;
             }
             unsigned int servedBlocks = mac_->getAmc()->computeReqRbs(senderId, b, cw, servedBytes, dir);
             // update the bytes counter
@@ -579,7 +590,7 @@ LteSchedulerEnbUl::schedulePerAcidRtxD2D(MacNodeId destId,MacNodeId senderId, Co
         if (toServe > 0)
         {
             // process couldn't be served - no sufficient space on available bands
-            EV << NOW << " LteSchedulerEnbUl::schedulePerAcidRtxD2D Unavailable space for serving node " << senderId << " ,HARQ Process " << (unsigned int)currentAcid << " on codeword " << cw << endl;
+            EV_TRACE << NOW << " LteSchedulerEnbUl::schedulePerAcidRtxD2D Unavailable space for serving node " << senderId << " ,HARQ Process " << (unsigned int)currentAcid << " on codeword " << cw << endl;
 
             delete(bandLim);
             return 0;
@@ -599,11 +610,11 @@ LteSchedulerEnbUl::schedulePerAcidRtxD2D(MacNodeId destId,MacNodeId senderId, Co
                 Band b = bandLim->at(i).band_;
 
                 cwAllocatedBlocks += assignedBlocks.at(i);
-                EV << "\t Cw->" << allocatedCw << "/" << MAX_CODEWORDS << endl;
+                EV_TRACE << "\t Cw->" << allocatedCw << "/" << MAX_CODEWORDS << endl;
                 //! handle multi-codeword allocation
                 if (allocatedCw!=MAX_CODEWORDS)
                 {
-                    EV << NOW << " LteSchedulerEnbUl::schedulePerAcidRtxD2D - adding " << assignedBlocks.at(i) << " to band " << i << endl;
+                    EV_TRACE << NOW << " LteSchedulerEnbUl::schedulePerAcidRtxD2D - adding " << assignedBlocks.at(i) << " to band " << i << endl;
                     allocator_->addBlocks(antenna,b,senderId,assignedBlocks.at(i),assignedBytes.at(i));
                 }
                 //! TODO check if ok bandLim->at.limit_.at(cw) = assignedBytes.at(i);
@@ -622,7 +633,7 @@ LteSchedulerEnbUl::schedulePerAcidRtxD2D(MacNodeId destId,MacNodeId senderId, Co
                 allocatedCws_[senderId]=1;
             }
 
-            EV << NOW << " LteSchedulerEnbUl::schedulePerAcidRtxD2D HARQ Process " << (unsigned int)currentAcid << " : " << bytes << " bytes served! " << endl;
+            EV_TRACE << NOW << " LteSchedulerEnbUl::schedulePerAcidRtxD2D HARQ Process " << (unsigned int)currentAcid << " : " << bytes << " bytes served! " << endl;
 
             currentProcess->markSelected(cw);
 
@@ -641,7 +652,7 @@ LteSchedulerEnbUl::schedulePerAcidRtxD2D(MacNodeId destId,MacNodeId senderId, Co
 
 void LteSchedulerEnbUl::initHarqStatus(MacNodeId id, unsigned char acid)
 {
-    EV << NOW << ")LteSchedulerEnbUl::initHarqStatus - initializing harq status for id " << id << "to status " << (unsigned int)acid << endl;
+    EV_TRACE << NOW << ")LteSchedulerEnbUl::initHarqStatus - initializing harq status for id " << id << "to status " << (unsigned int)acid << endl;
     harqStatus_[id]=acid;
 }
 

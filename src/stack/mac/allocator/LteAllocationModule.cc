@@ -181,7 +181,7 @@ unsigned int LteAllocationModule::computeTotalRbs()
         throw cRuntimeError("LteAllocator::checkOFDMspace(): Negative OFDM space");
 
     // DEBUG
-    EV << NOW << " LteAllocationModule::computeTotalRbs " << dirToA(dir_) << " - total " << resourceBlocks <<
+    EV_TRACE << NOW << " LteAllocationModule::computeTotalRbs " << dirToA(dir_) << " - total " << resourceBlocks <<
     ", allocated " << allocatedBlocks << ", " << availableBlocks << " blocks available" << endl;
 
     return ((unsigned int) availableBlocks);
@@ -198,7 +198,7 @@ unsigned int LteAllocationModule::availableBlocks(const MacNodeId nodeId, const 
     if (blocksPerBand >= allocatedBlocks)
     {
         // DEBUG
-        EV << NOW << " LteAllocator::availableBlocks " << dirToA(dir_) << " - Band " << band <<
+        EV_TRACE << NOW << " LteAllocator::availableBlocks " << dirToA(dir_) << " - Band " << band <<
         " has " << blocksPerBand - allocatedBlocks <<
         " blocks available [total " << blocksPerBand << ", allocated " << allocatedBlocks << "]" << endl;
 
@@ -274,7 +274,7 @@ bool LteAllocationModule::addBlocks(const Remote antenna, const Band band, const
     // Check if the band can satisfy the request
     if ((availableBlocksOnBand - (int) blocks) < 0)
     {
-        EV << NOW << " LteAllocator::addBlocks " << dirToA(dir_) << " - Node " << nodeId <<
+        EV_TRACE << NOW << " LteAllocator::addBlocks " << dirToA(dir_) << " - Node " << nodeId <<
         ", not enough space on band " << band << ": requested " << blocks <<
         " available " << availableBlocksOnBand << " " << endl;
         return false;
@@ -282,7 +282,7 @@ bool LteAllocationModule::addBlocks(const Remote antenna, const Band band, const
         // check if UE is out of range. (CQI=0 => bytes=0)
     if (bytes == 0)
     {
-        EV << NOW << " LteAllocator::addBlocks " << dirToA(dir_) << " - Node " << nodeId << " - 0 bytes available with " << blocks << " blocks" << endl;
+        EV_TRACE << NOW << " LteAllocator::addBlocks " << dirToA(dir_) << " - Node " << nodeId << " - 0 bytes available with " << blocks << " blocks" << endl;
         return false;
     }
 
@@ -305,7 +305,7 @@ bool LteAllocationModule::addBlocks(const Remote antenna, const Band band, const
     // update the allocatedBlocks counter
     allocatedRbsMatrix_[plane][antenna] += blocks;
 
-    EV << NOW << " LteAllocator::addBlocks " << dirToA(dir_) << " - Node " << nodeId << ", the request of " << blocks << " blocks on band " << band << " satisfied" << endl;
+    EV_TRACE << NOW << " LteAllocator::addBlocks " << dirToA(dir_) << " - Node " << nodeId << ", the request of " << blocks << " blocks on band " << band << " satisfied" << endl;
 
     return true;
 }
@@ -315,7 +315,7 @@ unsigned int LteAllocationModule::removeBlocks(const Remote antenna, const Band 
     // Check if the band exists
     if (band >= bands_)
     {
-        EV << NOW << " LteAllocator::removeBlocks " << dirToA(dir_) << " - Node " << nodeId << ", invalid band " << band << endl;
+        EV_TRACE << NOW << " LteAllocator::removeBlocks " << dirToA(dir_) << " - Node " << nodeId << ", invalid band " << band << endl;
         return 0;
     }
 
@@ -343,7 +343,7 @@ unsigned int LteAllocationModule::removeBlocks(const Remote antenna, const Band 
     allocatedRbsMatrix_[plane][antenna] -= toDrain;
 
     // DEBUG
-    EV << NOW << " LteAllocator::removeBlocks " << dirToA(dir_) << " - Node " << nodeId << ", " << toDrain << " blocks drained from band " << band << endl;
+    EV_TRACE << NOW << " LteAllocator::removeBlocks " << dirToA(dir_) << " - Node " << nodeId << ", " << toDrain << " blocks drained from band " << band << endl;
 
     return toDrain;
 }

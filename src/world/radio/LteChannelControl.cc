@@ -13,7 +13,7 @@
 
 #include "stack/phy/packet/AirFrame_m.h"
 
-#define coreEV EV << "LteChannelControl: "
+#define coreEV EV_TRACE << "LteChannelControl: "
 
 Define_Module(LteChannelControl);
 

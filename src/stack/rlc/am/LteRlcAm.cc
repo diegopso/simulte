@@ -34,7 +34,7 @@ LteRlcAm::getTxBuffer(MacNodeId nodeId, LogicalCid lcid)
                 getParentModule()));
         txBuffers_[cid] = txbuf; // Add to tx_buffers map
 
-        EV << NOW << " LteRlcAm : Added new AmTxBuffer: " << txbuf->getId()
+        EV_TRACE << NOW << " LteRlcAm : Added new AmTxBuffer: " << txbuf->getId()
            << " for node: " << nodeId << " for Lcid: " << lcid << "\n";
 
         return txbuf;
@@ -42,7 +42,7 @@ LteRlcAm::getTxBuffer(MacNodeId nodeId, LogicalCid lcid)
     else
     {
         // Found
-        EV << NOW << " LteRlcAm : Using old AmTxBuffer: " << it->second->getId()
+        EV_TRACE << NOW << " LteRlcAm : Using old AmTxBuffer: " << it->second->getId()
            << " for node: " << nodeId << " for Lcid: " << lcid << "\n";
 
         return it->second;
@@ -67,7 +67,7 @@ LteRlcAm::getRxBuffer(MacNodeId nodeId, LogicalCid lcid)
                 getParentModule()));
         rxBuffers_[cid] = rxbuf; // Add to rx_buffers map
 
-        EV << NOW << " LteRlcAm : Added new AmRxBuffer: " << rxbuf->getId()
+        EV_TRACE << NOW << " LteRlcAm : Added new AmRxBuffer: " << rxbuf->getId()
            << " for node: " << nodeId << " for Lcid: " << lcid << "\n";
 
         return rxbuf;
@@ -75,7 +75,7 @@ LteRlcAm::getRxBuffer(MacNodeId nodeId, LogicalCid lcid)
     else
     {
         // Found
-        EV << NOW << " LteRlcAm : Using old AmRxBuffer: " << it->second->getId()
+        EV_TRACE << NOW << " LteRlcAm : Using old AmRxBuffer: " << it->second->getId()
            << " for node: " << nodeId << " for Lcid: " << lcid << "\n";
 
         return it->second;
@@ -87,7 +87,7 @@ void LteRlcAm::sendDefragmented(cPacket *pkt)
     Enter_Method("sendDefragmented()"); // Direct Method Call
     take(pkt); // Take ownership
 
-    EV << NOW << " LteRlcAm : Sending packet " << pkt->getName()
+    EV_TRACE << NOW << " LteRlcAm : Sending packet " << pkt->getName()
        << " to port AM_Sap_up$o\n";
     send(pkt, up_[OUT]);
 }
@@ -97,7 +97,7 @@ void LteRlcAm::sendFragmented(cPacket *pkt)
     Enter_Method("sendFragmented()"); // Direct Method Call
     take(pkt); // Take ownership
 
-    EV << NOW << " LteRlcAm : Sending packet " << pkt->getName() << " of size "
+    EV_TRACE << NOW << " LteRlcAm : Sending packet " << pkt->getName() << " of size "
        << pkt->getByteLength() << "  to port AM_Sap_down$o\n";
 
     send(pkt, down_[OUT]);
@@ -117,7 +117,7 @@ void LteRlcAm::handleUpperMessage(cPacket *pkt)
     rlcPkt->encapsulate(pkt);
     rlcPkt->setControlInfo(lteInfo);
     drop(rlcPkt);
-    EV << NOW << " LteRlcAm : handleUpperMessage sending to AM TX Queue" << endl;
+    EV_TRACE << NOW << " LteRlcAm : handleUpperMessage sending to AM TX Queue" << endl;
     // Fragment Packet
     txbuf->enque(rlcPkt);
 }
@@ -139,7 +139,7 @@ void LteRlcAm::handleLowerMessage(cPacket *pkt)
 
     if ((pdu->getAmType() == ACK) || (pdu->getAmType() == MRW_ACK))
     {
-        EV << NOW << " LteRlcAm::handleLowerMessage Received ACK message" << endl;
+        EV_TRACE << NOW << " LteRlcAm::handleLowerMessage Received ACK message" << endl;
 
         // forwarding ACK to associated transmitting entity
         routeControlMessage(pdu);
@@ -153,7 +153,7 @@ void LteRlcAm::handleLowerMessage(cPacket *pkt)
     AmRxQueue* rxbuf = getRxBuffer(ctrlInfoToUeId(lteInfo), lteInfo->getLcid());
     drop(pkt);
 
-    EV << NOW << " LteRlcAm::handleLowerMessage sending packet to AM RX Queue " << endl;
+    EV_TRACE << NOW << " LteRlcAm::handleLowerMessage sending packet to AM RX Queue " << endl;
     // Defragment packet
     rxbuf->enque(check_and_cast<LteRlcAmPdu*>(pkt));
 }
@@ -204,18 +204,18 @@ void LteRlcAm::initialize()
 void LteRlcAm::handleMessage(cMessage* msg)
 {
     cPacket* pkt = check_and_cast<cPacket *>(msg);
-    EV << NOW << " LteRlcAm : Received packet " << pkt->getName() << " from port "
+    EV_TRACE << NOW << " LteRlcAm : Received packet " << pkt->getName() << " from port "
        << pkt->getArrivalGate()->getName() << endl;
 
     cGate* incoming = pkt->getArrivalGate();
     if (incoming == up_[IN])
     {
-        EV << NOW << " LteRlcAm : calling handleUpperMessage" << endl;
+        EV_TRACE << NOW << " LteRlcAm : calling handleUpperMessage" << endl;
         handleUpperMessage(pkt);
     }
     else if (incoming == down_[IN])
     {
-        EV << NOW << " LteRlcAm : calling handleLowerMessage" << endl;
+        EV_TRACE << NOW << " LteRlcAm : calling handleLowerMessage" << endl;
         handleLowerMessage(pkt);
     }
     return;

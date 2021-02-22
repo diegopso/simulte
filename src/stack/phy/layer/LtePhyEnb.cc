@@ -46,7 +46,7 @@ void LtePhyEnb::initialize(int stage)
     {
         // get local id
         nodeId_ = getAncestorPar("macNodeId");
-        EV << "Local MacNodeId: " << nodeId_ << endl;
+        EV_TRACE << "Local MacNodeId: " << nodeId_ << endl;
         std::cout << "Local MacNodeId: " << nodeId_ << endl;
 
         nodeType_ = ENODEB;
@@ -107,11 +107,11 @@ void LtePhyEnb::handleSelfMessage(cMessage *msg)
 
 bool LtePhyEnb::handleControlPkt(UserControlInfo* lteinfo, LteAirFrame* frame)
 {
-    EV << "Received control pkt " << endl;
+    EV_TRACE << "Received control pkt " << endl;
     MacNodeId senderMacNodeId = lteinfo->getSourceId();
     if (binder_->getOmnetId(senderMacNodeId) == 0)
     {
-        EV << "Sender (" << senderMacNodeId << ") does not exist anymore!" << std::endl;
+        EV_TRACE << "Sender (" << senderMacNodeId << ") does not exist anymore!" << std::endl;
         delete frame;
         return true;    // FIXME ? make sure that nodes that left the simulation do not send
     }
@@ -148,12 +148,12 @@ void LtePhyEnb::handleAirFrame(cMessage* msg)
 
     LteAirFrame* frame = static_cast<LteAirFrame*>(msg);
 
-    EV << "LtePhy: received new LteAirFrame with ID " << frame->getId() << " from channel" << endl;
+    EV_TRACE << "LtePhy: received new LteAirFrame with ID " << frame->getId() << " from channel" << endl;
 
     // handle broadcast packet sent by another eNB
     if (lteInfo->getFrameType() == HANDOVERPKT)
     {
-        EV << "LtePhyEnb::handleAirFrame - received handover packet from another eNodeB. Ignore it." << endl;
+        EV_TRACE << "LtePhyEnb::handleAirFrame - received handover packet from another eNodeB. Ignore it." << endl;
         delete lteInfo;
         delete frame;
         return;
@@ -169,9 +169,9 @@ void LtePhyEnb::handleAirFrame(cMessage* msg)
      */
     if (binder_->getNextHop(lteInfo->getSourceId()) != nodeId_)
     {
-        EV << "WARNING: frame from a UE that is leaving this cell (handover): deleted " << endl;
-        EV << "Source MacNodeId: " << lteInfo->getSourceId() << endl;
-        EV << "Master MacNodeId: " << nodeId_ << endl;
+        EV_TRACE << "WARNING: frame from a UE that is leaving this cell (handover): deleted " << endl;
+        EV_TRACE << "Source MacNodeId: " << lteInfo->getSourceId() << endl;
+        EV_TRACE << "Master MacNodeId: " << nodeId_ << endl;
         delete lteInfo;
         delete frame;
         return;
@@ -200,7 +200,7 @@ void LtePhyEnb::handleAirFrame(cMessage* msg)
         // Message from ue
         for (RemoteSet::iterator it = r.begin(); it != r.end(); it++)
         {
-            EV << "LtePhy: Receiving Packet from antenna " << (*it) << "\n";
+            EV_TRACE << "LtePhy: Receiving Packet from antenna " << (*it) << "\n";
 
             /*
              * On eNodeB set the current position
@@ -225,7 +225,7 @@ void LtePhyEnb::handleAirFrame(cMessage* msg)
     else
         numAirFrameNotReceived_++;
 
-    EV << "Handled LteAirframe with ID " << frame->getId() << " with result "
+    EV_TRACE << "Handled LteAirframe with ID " << frame->getId() << " with result "
        << (result ? "RECEIVED" : "NOT RECEIVED") << endl;
 
     cPacket* pkt = frame->decapsulate();
@@ -246,7 +246,7 @@ void LtePhyEnb::handleAirFrame(cMessage* msg)
 void LtePhyEnb::requestFeedback(UserControlInfo* lteinfo, LteAirFrame* frame,
     LteFeedbackPkt* pkt)
 {
-    EV << NOW << " LtePhyEnb::requestFeedback " << endl;
+    EV_TRACE << NOW << " LtePhyEnb::requestFeedback " << endl;
     //get UE Position
     Coord sendersPos = lteinfo->getCoord();
     cellInfo_->setUePosition(lteinfo->getSourceId(), sendersPos);
@@ -317,7 +317,7 @@ void LtePhyEnb::requestFeedback(UserControlInfo* lteinfo, LteAirFrame* frame,
         else
             pkt->setLteFeedbackDoubleVectorDl(fb_);
     }
-    EV << "LtePhyEnb::requestFeedback : Pisa Feedback Generated for nodeId: "
+    EV_TRACE << "LtePhyEnb::requestFeedback : Pisa Feedback Generated for nodeId: "
        << nodeId_ << " with generator type "
        << fbGeneratorTypeToA(req.genType) << " Fb size: " << fb_.size() << endl;
 }
@@ -325,7 +325,7 @@ void LtePhyEnb::requestFeedback(UserControlInfo* lteinfo, LteAirFrame* frame,
 void LtePhyEnb::handleFeedbackPkt(UserControlInfo* lteinfo,
     LteAirFrame *frame)
 {
-    EV << "Handled Feedback Packet with ID " << frame->getId() << endl;
+    EV_TRACE << "Handled Feedback Packet with ID " << frame->getId() << endl;
     LteFeedbackPkt* pkt = check_and_cast<LteFeedbackPkt*>(frame->decapsulate());
     // here frame has to be destroyed since it is no more useful
     pkt->setControlInfo(lteinfo);
@@ -346,9 +346,9 @@ void LtePhyEnb::handleFeedbackPkt(UserControlInfo* lteinfo,
                 for (jt = it->begin(); jt != it->end(); ++jt)
                 {
                     MacNodeId id = lteinfo->getSourceId();
-                    EV << endl << "Node:" << id << endl;
+                    EV_TRACE << endl << "Node:" << id << endl;
                     TxMode t = jt->getTxMode();
-                    EV << "TXMODE: " << txModeToA(t) << endl;
+                    EV_TRACE << "TXMODE: " << txModeToA(t) << endl;
                     if (jt->hasBandCqi())
                     {
                         std::vector<CqiVector> vec = jt->getBandCqi();
@@ -359,7 +359,7 @@ void LtePhyEnb::handleFeedbackPkt(UserControlInfo* lteinfo,
                         {
                             for (i = 0, ht = kt->begin(); ht != kt->end();
                                 ++ht, i++)
-                            EV << "Banda " << i << " Cqi " << *ht << endl;
+                            EV_TRACE << "Banda " << i << " Cqi " << *ht << endl;
                         }
                     }
                     else if (jt->hasWbCqi())
@@ -367,11 +367,11 @@ void LtePhyEnb::handleFeedbackPkt(UserControlInfo* lteinfo,
                         CqiVector v = jt->getWbCqi();
                         CqiVector::iterator ht = v.begin();
                         for (; ht != v.end(); ++ht)
-                        EV << "wb cqi " << *ht << endl;
+                        EV_TRACE << "wb cqi " << *ht << endl;
                     }
                     if (jt->hasRankIndicator())
                     {
-                        EV << "Rank " << jt->getRankIndicator() << endl;
+                        EV_TRACE << "Rank " << jt->getRankIndicator() << endl;
                     }
                 }
             }
@@ -474,6 +474,6 @@ void LtePhyEnb::initializeFeedbackComputation()
         targetBler, cellInfo_->getLambda(), lambdaMinTh, lambdaMaxTh,
         lambdaRatioTh, cellInfo_->getNumBands());
 
-    EV << "Feedback Computation \"" << name << "\" loaded." << endl;
+    EV_TRACE << "Feedback Computation \"" << name << "\" loaded." << endl;
 }
 

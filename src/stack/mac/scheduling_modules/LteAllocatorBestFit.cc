@@ -95,7 +95,7 @@ bool LteAllocatorBestFit::checkConflict(const CGMatrix* cgMatrix, MacNodeId node
 
 void LteAllocatorBestFit::prepareSchedule()
 {
-    EV << NOW << " LteAllocatorBestFit::schedule " << eNbScheduler_->mac_->getMacNodeId() << endl;
+    EV_TRACE << NOW << " LteAllocatorBestFit::schedule " << eNbScheduler_->mac_->getMacNodeId() << endl;
 
     if (binder_ == NULL)
         binder_ = getBinder();
@@ -160,7 +160,7 @@ void LteAllocatorBestFit::prepareSchedule()
         if (conn->isEmpty())
         {
             // The BSR buffer for this node is empty. Abort scheduling for the node: no data to transmit.
-            EV << "LteAllocatorBestFit:: scheduled connection is no more active . Exiting grant " << endl;
+            EV_TRACE << "LteAllocatorBestFit:: scheduled connection is no more active . Exiting grant " << endl;
             // The BSR buffer for this node is empty so the connection is no more active.
             inactive_connections.insert(cid);
             continue;
@@ -219,7 +219,7 @@ void LteAllocatorBestFit::prepareSchedule()
         // Insert the cid score in the right list
         score.push (desc);
 
-        EV << NOW << " LteAllocatorBestFit::schedule computed for cid " << cid << " score of " << desc.score_ << endl;
+        EV_TRACE << NOW << " LteAllocatorBestFit::schedule computed for cid " << cid << " score of " << desc.score_ << endl;
     }
 
     //Delete inactive connections
@@ -247,7 +247,7 @@ void LteAllocatorBestFit::prepareSchedule()
         else
             dir = DL;
 
-        EV << NOW << " LteAllocatorBestFit::schedule scheduling connection " << cid << " with score of " << current.score_ << endl;
+        EV_TRACE << NOW << " LteAllocatorBestFit::schedule scheduling connection " << cid << " with score of " << current.score_ << endl;
 
         // Compute Tx params for the extracted node
         const UserTxParams& txParams = mac_->getAmc()->computeTxParams(nodeId,dir);
@@ -303,7 +303,7 @@ void LteAllocatorBestFit::prepareSchedule()
         if (enableFrequencyReuse)  // if frequency reuse is possible for the connection's direction
         {
 //            std::cout << NOW << " UE " << nodeId << " is D2D enabled" << endl;
-            EV << NOW << " Connection " << cid << " can exploit frequency reuse, dir[" << dirToA(dir) << "]" << endl;
+            EV_TRACE << NOW << " Connection " << cid << " can exploit frequency reuse, dir[" << dirToA(dir) << "]" << endl;
 
             // Check if the allocation is possible starting from the first unallocated band
             for( band=firstUnallocatedBand; band<numBands; band++ )
@@ -368,7 +368,7 @@ void LteAllocatorBestFit::prepareSchedule()
         }
         else
         {
-            EV << NOW << " Connection " << cid << " cannot exploit frequency reuse, dir[" << dirToA(dir) << "]" << endl;
+            EV_TRACE << NOW << " Connection " << cid << " cannot exploit frequency reuse, dir[" << dirToA(dir) << "]" << endl;
 
             bool jump_band = false;
 
@@ -421,7 +421,7 @@ void LteAllocatorBestFit::prepareSchedule()
             {
                 blocks++;
 
-                EV << NOW << " LteAllocatorBestFit - UE " << nodeId << ": allocated RB " << band << " [" <<blocks<<"]" << endl;
+                EV_TRACE << NOW << " LteAllocatorBestFit - UE " << nodeId << ": allocated RB " << band << " [" <<blocks<<"]" << endl;
 
                 // Book the bands that must be allocated
                 bookedBands.push_back(band);
@@ -436,7 +436,7 @@ void LteAllocatorBestFit::prepareSchedule()
             {
                 blocks++;
 
-                EV << NOW << " LteAllocatorBestFit - UE " << nodeId << ": allocated RB " << band << " [" <<blocks<<"]" << endl;
+                EV_TRACE << NOW << " LteAllocatorBestFit - UE " << nodeId << ": allocated RB " << band << " [" <<blocks<<"]" << endl;
 
                 // Book the bands that must be allocated
                 bookedBands.push_back(band);
@@ -513,13 +513,13 @@ void LteAllocatorBestFit::updateSchedulingInfo()
 
 void LteAllocatorBestFit::notifyActiveConnection(MacCid cid)
 {
-    EV << NOW << "LteAllocatorBestFit::notify CID notified " << cid << endl;
+    EV_TRACE << NOW << "LteAllocatorBestFit::notify CID notified " << cid << endl;
     activeConnectionSet_.insert(cid);
 }
 
 void LteAllocatorBestFit::removeActiveConnection(MacCid cid)
 {
-    EV << NOW << "LteAllocatorBestFit::remove CID removed " << cid << endl;
+    EV_TRACE << NOW << "LteAllocatorBestFit::remove CID removed " << cid << endl;
     activeConnectionSet_.erase(cid);
 }
 

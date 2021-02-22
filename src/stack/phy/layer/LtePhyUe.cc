@@ -125,7 +125,7 @@ void LtePhyUe::initialize(int stage)
                     rssi += *it;
                 rssi /= rssiV.size();   // compute the mean over all RBs
 
-                EV << "LtePhyUe::initialize - RSSI from eNodeB " << cellId << ": " << rssi << " dB (current candidate eNodeB " << candidateMasterId_ << ": " << candidateMasterRssi_ << " dB" << endl;
+                EV_TRACE << "LtePhyUe::initialize - RSSI from eNodeB " << cellId << ": " << rssi << " dB (current candidate eNodeB " << candidateMasterId_ << ": " << candidateMasterRssi_ << " dB" << endl;
 
                 if (rssi > candidateMasterRssi_)
                 {
@@ -148,7 +148,7 @@ void LtePhyUe::initialize(int stage)
             masterId_ = getAncestorPar("masterId");
             candidateMasterId_ = masterId_;
         }
-        EV << "LtePhyUe::initialize - Attaching to eNodeB " << masterId_ << endl;
+        EV_TRACE << "LtePhyUe::initialize - Attaching to eNodeB " << masterId_ << endl;
 
         das_->setMasterRuSet(masterId_);
         emit(servingCell_, (long)masterId_);
@@ -157,7 +157,7 @@ void LtePhyUe::initialize(int stage)
     {
         // get local id
         nodeId_ = getAncestorPar("macNodeId");
-        EV << "Local MacNodeId: " << nodeId_ << endl;
+        EV_TRACE << "Local MacNodeId: " << nodeId_ << endl;
 
         // get cellInfo at this stage because the next hop of the node is registered in the IP2Lte module at the INITSTAGE_NETWORK_LAYER
         cellInfo_ = getCellInfo(nodeId_);
@@ -216,7 +216,7 @@ void LtePhyUe::handoverHandler(LteAirFrame* frame, UserControlInfo* lteInfo)
         rssi /= rssiV.size();
     }
 
-    EV << "UE " << nodeId_ << " broadcast frame from " << lteInfo->getSourceId() << " with RSSI: " << rssi << " at " << simTime() << endl;
+    EV_TRACE << "UE " << nodeId_ << " broadcast frame from " << lteInfo->getSourceId() << " with RSSI: " << rssi << " at " << simTime() << endl;
 
     if (rssi > candidateMasterRssi_ + hysteresisTh_)
     {
@@ -263,14 +263,14 @@ void LtePhyUe::triggerHandover()
     // TODO: remove asserts after testing
     assert(masterId_ != candidateMasterId_);
 
-    EV << "####Handover starting:####" << endl;
-    EV << "current master: " << masterId_ << endl;
-    EV << "current rssi: " << currentMasterRssi_ << endl;
-    EV << "candidate master: " << candidateMasterId_ << endl;
-    EV << "candidate rssi: " << candidateMasterRssi_ << endl;
-    EV << "############" << endl;
+    EV_TRACE << "####Handover starting:####" << endl;
+    EV_TRACE << "current master: " << masterId_ << endl;
+    EV_TRACE << "current rssi: " << currentMasterRssi_ << endl;
+    EV_TRACE << "candidate master: " << candidateMasterId_ << endl;
+    EV_TRACE << "candidate rssi: " << candidateMasterRssi_ << endl;
+    EV_TRACE << "############" << endl;
 
-    EV << NOW << " LtePhyUe::triggerHandover - UE " << nodeId_ << " is starting handover to eNB " << candidateMasterId_ << "... " << endl;
+    EV_TRACE << NOW << " LtePhyUe::triggerHandover - UE " << nodeId_ << " is starting handover to eNB " << candidateMasterId_ << "... " << endl;
 
     binder_->addUeHandoverTriggered(nodeId_);
 
@@ -330,7 +330,7 @@ void LtePhyUe::doHandover()
     // collect stat
     emit(servingCell_, (long)masterId_);
 
-    EV << NOW << " LtePhyUe::doHandover - UE " << nodeId_ << " has completed handover to eNB " << masterId_ << "... " << endl;
+    EV_TRACE << NOW << " LtePhyUe::doHandover - UE " << nodeId_ << " has completed handover to eNB " << masterId_ << "... " << endl;
     binder_->removeUeHandoverTriggered(nodeId_);
 
     // inform the UE's IP2lte module to forward held packets
@@ -354,7 +354,7 @@ void LtePhyUe::handleAirFrame(cMessage* msg)
     }
     connectedNodeId_ = masterId_;
     LteAirFrame* frame = check_and_cast<LteAirFrame*>(msg);
-    EV << "LtePhy: received new LteAirFrame with ID " << frame->getId() << " from channel" << endl;
+    EV_TRACE << "LtePhy: received new LteAirFrame with ID " << frame->getId() << " from channel" << endl;
 
     int sourceId = binder_->getOmnetId(lteInfo->getSourceId());
     if(sourceId == 0 )
@@ -382,10 +382,10 @@ void LtePhyUe::handleAirFrame(cMessage* msg)
     // Check if the frame is for us ( MacNodeId matches )
     if (lteInfo->getDestId() != nodeId_)
     {
-        EV << "ERROR: Frame is not for us. Delete it." << endl;
-        EV << "Packet Type: " << phyFrameTypeToA((LtePhyFrameType)lteInfo->getFrameType()) << endl;
-        EV << "Frame MacNodeId: " << lteInfo->getDestId() << endl;
-        EV << "Local MacNodeId: " << nodeId_ << endl;
+        EV_TRACE << "ERROR: Frame is not for us. Delete it." << endl;
+        EV_TRACE << "Packet Type: " << phyFrameTypeToA((LtePhyFrameType)lteInfo->getFrameType()) << endl;
+        EV_TRACE << "Frame MacNodeId: " << lteInfo->getDestId() << endl;
+        EV_TRACE << "Local MacNodeId: " << nodeId_ << endl;
         delete lteInfo;
         delete frame;
         return;
@@ -400,9 +400,9 @@ void LtePhyUe::handleAirFrame(cMessage* msg)
          */
     if (lteInfo->getSourceId() != masterId_)
     {
-        EV << "WARNING: frame from an old master during handover: deleted " << endl;
-        EV << "Source MacNodeId: " << lteInfo->getSourceId() << endl;
-        EV << "Master MacNodeId: " << masterId_ << endl;
+        EV_TRACE << "WARNING: frame from an old master during handover: deleted " << endl;
+        EV_TRACE << "Source MacNodeId: " << lteInfo->getSourceId() << endl;
+        EV_TRACE << "Master MacNodeId: " << masterId_ << endl;
         delete frame;
         return;
     }
@@ -429,7 +429,7 @@ void LtePhyUe::handleAirFrame(cMessage* msg)
         // DAS
         for (RemoteSet::iterator it = r.begin(); it != r.end(); it++)
         {
-            EV << "LtePhy: Receiving Packet from antenna " << (*it) << "\n";
+            EV_TRACE << "LtePhy: Receiving Packet from antenna " << (*it) << "\n";
 
             /*
              * On UE set the sender position
@@ -460,7 +460,7 @@ void LtePhyUe::handleAirFrame(cMessage* msg)
     else
         numAirFrameNotReceived_++;
 
-    EV << "Handled LteAirframe with ID " << frame->getId() << " with result "
+    EV_TRACE << "Handled LteAirframe with ID " << frame->getId() << " with result "
        << ( result ? "RECEIVED" : "NOT RECEIVED" ) << endl;
 
     cPacket* pkt = frame->decapsulate();
@@ -490,9 +490,11 @@ void LtePhyUe::handleUpperMessage(cMessage* msg)
     if (dest != masterId_)
     {
         // UE is not sending to its master!!
-        EV << "ERROR: Ue preparing to send message to " << dest << "instead "
+        EV_TRACE << "ERROR: Ue preparing to send message to " << dest << "instead "
         "of its master (" << masterId_ << ")" << endl;
-        endSimulation();
+        //endSimulation();
+        delete msg; // in-flight message on previous UL Grant
+        return;
     }
 
     if (lteInfo->getFrameType() == DATAPKT && (channelModel_->isUplinkInterferenceEnabled() || channelModel_->isD2DInterferenceEnabled()))
@@ -526,13 +528,13 @@ void LtePhyUe::handleUpperMessage(cMessage* msg)
 //        return;
 //
 //    if (!useBattery_ && state.get() == HostState::FAILED) {
-//        EV << "Warning: host state failed at node " << getName() << " while not using a battery!";
+//        EV_TRACE << "Warning: host state failed at node " << getName() << " while not using a battery!";
 //        return;
 //    }
 //
 //    if (state.get() == HostState::FAILED) {
 //        //depleted battery
-//        EV << "Battery depleted at node" << getName() << " with id " << getId();
+//        EV_TRACE << "Battery depleted at node" << getName() << " with id " << getId();
 //        //TODO: stop sending and receiving messages or just collect statistics?
 //    }
 //}
@@ -578,7 +580,7 @@ DasFilter* LtePhyUe::getDasFilter()
 void LtePhyUe::sendFeedback(LteFeedbackDoubleVector fbDl, LteFeedbackDoubleVector fbUl, FeedbackRequest req)
 {
     Enter_Method("SendFeedback");
-    EV << "LtePhyUe: feedback from Feedback Generator" << endl;
+    EV_TRACE << "LtePhyUe: feedback from Feedback Generator" << endl;
 
     //Create a feedback packet
     LteFeedbackPkt* fbPkt = new LteFeedbackPkt();
@@ -612,7 +614,7 @@ void LtePhyUe::sendFeedback(LteFeedbackDoubleVector fbDl, LteFeedbackDoubleVecto
 //        cellInfo_->lambdaIncrease(nodeId_,1);
 //    }
     lastFeedback_ = NOW;
-    EV << "LtePhy: " << nodeTypeToA(nodeType_) << " with id "
+    EV_TRACE << "LtePhy: " << nodeTypeToA(nodeType_) << " with id "
        << nodeId_ << " sending feedback to the air channel" << endl;
     sendUnicast(frame);
 }

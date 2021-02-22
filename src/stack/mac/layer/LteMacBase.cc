@@ -51,7 +51,7 @@ LteMacBase::~LteMacBase()
 
 void LteMacBase::sendUpperPackets(cPacket* pkt)
 {
-    EV << "LteMacBase : Sending packet " << pkt->getName() << " on port MAC_to_RLC\n";
+    EV_TRACE << "LteMacBase : Sending packet " << pkt->getName() << " on port MAC_to_RLC\n";
     // Send message
     send(pkt,up_[OUT]);
     emit(sentPacketToUpperLayer, pkt);
@@ -59,7 +59,7 @@ void LteMacBase::sendUpperPackets(cPacket* pkt)
 
 void LteMacBase::sendLowerPackets(cPacket* pkt)
 {
-    EV << "LteMacBase : Sending packet " << pkt->getName() << " on port MAC_to_PHY\n";
+    EV_TRACE << "LteMacBase : Sending packet " << pkt->getName() << " on port MAC_to_PHY\n";
     // Send message
     updateUserTxParam(pkt);
     send(pkt,down_[OUT]);
@@ -89,7 +89,7 @@ void LteMacBase::fromPhy(cPacket *pkt)
     {
         // H-ARQ feedback, send it to TX buffer of source
         HarqTxBuffers::iterator htit = harqTxBuffers_.find(src);
-        EV << NOW << "Mac::fromPhy: node " << nodeId_ << " Received HARQ Feedback pkt" << endl;
+        EV_TRACE << NOW << "Mac::fromPhy: node " << nodeId_ << " Received HARQ Feedback pkt" << endl;
         if (htit == harqTxBuffers_.end())
         {
             // if a feedback arrives, a tx buffer must exists (unless it is an handover scenario
@@ -107,19 +107,19 @@ void LteMacBase::fromPhy(cPacket *pkt)
     else if (userInfo->getFrameType() == FEEDBACKPKT)
     {
         //Feedback pkt
-        EV << NOW << "Mac::fromPhy: node " << nodeId_ << " Received feedback pkt" << endl;
+        EV_TRACE << NOW << "Mac::fromPhy: node " << nodeId_ << " Received feedback pkt" << endl;
         macHandleFeedbackPkt(pkt);
     }
     else if (userInfo->getFrameType()==GRANTPKT)
     {
         //Scheduling Grant
-        EV << NOW << "Mac::fromPhy: node " << nodeId_ << " Received Scheduling Grant pkt" << endl;
+        EV_TRACE << NOW << "Mac::fromPhy: node " << nodeId_ << " Received Scheduling Grant pkt" << endl;
         macHandleGrant(pkt);
     }
     else if(userInfo->getFrameType() == DATAPKT)
     {
         // data packet: insert in proper rx buffer
-        EV << NOW << "Mac::fromPhy: node " << nodeId_ << " Received DATA packet" << endl;
+        EV_TRACE << NOW << "Mac::fromPhy: node " << nodeId_ << " Received DATA packet" << endl;
 
         LteMacPdu *pdu = check_and_cast<LteMacPdu *>(pkt);
         Codeword cw = userInfo->getCw();
@@ -143,7 +143,7 @@ void LteMacBase::fromPhy(cPacket *pkt)
     }
     else if (userInfo->getFrameType() == RACPKT)
     {
-        EV << NOW << "Mac::fromPhy: node " << nodeId_ << " Received RAC packet" << endl;
+        EV_TRACE << NOW << "Mac::fromPhy: node " << nodeId_ << " Received RAC packet" << endl;
         macHandleRac(pkt);
     }
     else
@@ -185,7 +185,7 @@ bool LteMacBase::bufferizePacket(cPacket* pkt)
 
         lcgMap_.insert(LcgPair(tClass, CidBufferPair(cid, macBuffers_[cid])));
 
-        EV << "LteMacBuffers : Using new buffer on node: " <<
+        EV_TRACE << "LteMacBuffers : Using new buffer on node: " <<
         MacCidToNodeId(cid) << " for Lcid: " << MacCidToLcid(cid) << ", Space left in the Queue: " <<
         queue->getQueueSize() - queue->getByteLength() << "\n";
     }
@@ -211,13 +211,13 @@ bool LteMacBase::bufferizePacket(cPacket* pkt)
                 emit(macBufferOverflowD2D_,sample);
             }
 
-            EV << "LteMacBuffers : Dropped packet: queue" << cid << " is full\n";
+            EV_TRACE << "LteMacBuffers : Dropped packet: queue" << cid << " is full\n";
             delete pkt;
             return false;
         }
         vqueue->pushBack(vpkt);
 
-        EV << "LteMacBuffers : Using old buffer on node: " <<
+        EV_TRACE << "LteMacBuffers : Using old buffer on node: " <<
         MacCidToNodeId(cid) << " for Lcid: " << MacCidToLcid(cid) << ", Space left in the Queue: " <<
         queue->getQueueSize() - queue->getByteLength() << "\n";
     }
@@ -351,7 +351,7 @@ void LteMacBase::handleMessage(cMessage* msg)
     }
 
     cPacket* pkt = check_and_cast<cPacket *>(msg);
-    EV << "LteMacBase : Received packet " << pkt->getName() <<
+    EV_TRACE << "LteMacBase : Received packet " << pkt->getName() <<
     " from port " << pkt->getArrivalGate()->getName() << endl;
 
     cGate* incoming = pkt->getArrivalGate();

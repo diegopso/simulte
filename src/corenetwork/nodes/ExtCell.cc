@@ -106,13 +106,13 @@ void ExtCell::handleMessage(cMessage *msg)
 
 void ExtCell::updateBandStatus()
 {
-    EV << "----- EXT CELL ALLOCATION UPDATE -----" << endl;
+    EV_TRACE << "----- EXT CELL ALLOCATION UPDATE -----" << endl;
 
     resetBandStatus();
 
     if (allocationType_ == RANDOM_ALLOC)
     {
-        EV << " ExtCell::updateBandStatus() - generating new random allocation for extCell " << id_ << endl;
+        EV_TRACE << " ExtCell::updateBandStatus() - generating new random allocation for extCell " << id_ << endl;
 
         // allocates each band with probability equal to bandUtilization_
         for (int band = 0; band < numBands_; ++band)
@@ -123,7 +123,7 @@ void ExtCell::updateBandStatus()
     }
     else    // CONTIGUOUS ALLOC
     {
-        EV << " ExtCell::updateBandStatus() - generating new contiguous allocation for extCell " << id_ << endl;
+        EV_TRACE << " ExtCell::updateBandStatus() - generating new contiguous allocation for extCell " << id_ << endl;
 
         // get the number of bands to be allocated
         int toAlloc = ceil( (double)numBands_ * bandUtilization_);
@@ -136,7 +136,7 @@ void ExtCell::updateBandStatus()
         }
     }
 
-    EV << "----- END EXT CELL ALLOCATION UPDATE -----" << endl;
+    EV_TRACE << "----- END EXT CELL ALLOCATION UPDATE -----" << endl;
 }
 
 void ExtCell::resetBandStatus()

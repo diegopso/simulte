@@ -35,7 +35,7 @@ void TrafficFlowFilter::initialize(int stage)
 
 EpcNodeType TrafficFlowFilter::selectOwnerType(const char * type)
 {
-    EV << "TrafficFlowFilter::selectOwnerType - setting owner type to " << type << endl;
+    EV_TRACE << "TrafficFlowFilter::selectOwnerType - setting owner type to " << type << endl;
     if(strcmp(type,"ENODEB") == 0)
     return ENB;
     else if(strcmp(type,"PGW") == 0)
@@ -46,8 +46,8 @@ EpcNodeType TrafficFlowFilter::selectOwnerType(const char * type)
 
 void TrafficFlowFilter::handleMessage(cMessage *msg)
 {
-    EV << "TrafficFlowFilter::handleMessage - Received Packet:" << endl;
-    EV << "name: " << msg->getFullName() << endl;
+    EV_TRACE << "TrafficFlowFilter::handleMessage - Received Packet:" << endl;
+    EV_TRACE << "name: " << msg->getFullName() << endl;
 
     // receive and read IP datagram
     IPv4Datagram * datagram = check_and_cast<IPv4Datagram *>(msg);
@@ -58,7 +58,7 @@ void TrafficFlowFilter::handleMessage(cMessage *msg)
 
     IPv4Address primaryKey , secondaryKeyAddr;
 
-    EV << "TrafficFlowFilter::handleMessage - Received datagram : " << datagram->getName() << " - src[" << destAddr << "] - dest[" << srcAddr << "]\n";
+    EV_TRACE << "TrafficFlowFilter::handleMessage - Received datagram : " << datagram->getName() << " - src[" << destAddr << "] - dest[" << srcAddr << "]\n";
 
     // run packet filter and associate a flowId to the connection (default bearer?)
     // search within tftTable the proper entry for this destination
@@ -88,7 +88,7 @@ void TrafficFlowFilter::handleMessage(cMessage *msg)
     tftInfo->setTft(tftId);
     datagram->setControlInfo(tftInfo);
 
-    EV << "TrafficFlowFilter::handleMessage - setting tft=" << tftId << endl;
+    EV_TRACE << "TrafficFlowFilter::handleMessage - setting tft=" << tftId << endl;
 
     // send the datagram to the GTP-U module
     send(datagram,"gtpUserGateOut");
@@ -102,7 +102,7 @@ TrafficFlowTemplateId TrafficFlowFilter::findTrafficFlow(L3Address firstKey, Tra
     // if no entry found
     if (tftIt == filterTable_.end())
     {
-        EV << "TrafficFlowFilter::findTrafficFlow - Cannot find tft list for destAddress " << firstKey << "." << endl;
+        EV_TRACE << "TrafficFlowFilter::findTrafficFlow - Cannot find tft list for destAddress " << firstKey << "." << endl;
         return UNSPECIFIED_TFT;
     }
 
@@ -120,7 +120,7 @@ TrafficFlowTemplateId TrafficFlowFilter::findTrafficFlow(L3Address firstKey, Tra
         if ((*templIt) == secondKey)
             return templIt->tftId;
     }
-    EV << "TrafficFlowFilter::findTrafficFlow - Cannot find entry for the 4-tuple. Now trying with src and dest addresses" << endl;
+    EV_TRACE << "TrafficFlowFilter::findTrafficFlow - Cannot find entry for the 4-tuple. Now trying with src and dest addresses" << endl;
 
     // if no result is found, try leaving port fields unspecified
     secondKey.srcPort = secondKey.destPort = UNSPECIFIED_PORT;
@@ -129,7 +129,7 @@ TrafficFlowTemplateId TrafficFlowFilter::findTrafficFlow(L3Address firstKey, Tra
         if ((*templIt) == secondKey)
             return templIt->tftId;
     }
-    EV << "TrafficFlowFilter::findTrafficFlow - Cannot find entry for src and dest addresses. Now trying with first key only" << endl;
+    EV_TRACE << "TrafficFlowFilter::findTrafficFlow - Cannot find entry for src and dest addresses. Now trying with first key only" << endl;
 
     // if no result is found again, search only for the first key
     secondKey.addr.set(IPv4Address("0.0.0.0"));
@@ -139,7 +139,7 @@ TrafficFlowTemplateId TrafficFlowFilter::findTrafficFlow(L3Address firstKey, Tra
             return templIt->tftId;
     }
 
-    EV << "TrafficFlowFilter::findTrafficFlow - Cannot find entry for destAddress " << firstKey << " and values: ["
+    EV_TRACE << "TrafficFlowFilter::findTrafficFlow - Cannot find entry for destAddress " << firstKey << " and values: ["
        << secondKey.addr << "," << secondKey.destPort << "," << secondKey.srcPort << "]" << endl;
 
     return UNSPECIFIED_TFT;
@@ -147,21 +147,21 @@ TrafficFlowTemplateId TrafficFlowFilter::findTrafficFlow(L3Address firstKey, Tra
 
 bool TrafficFlowFilter::addTrafficFlow(L3Address firstKey, TrafficFlowTemplate tft)
 {
-    EV << "TrafficFlowFilter::addTrafficFlow - checking existence of an entry for destAddress " << firstKey << " and values: ["
+    EV_TRACE << "TrafficFlowFilter::addTrafficFlow - checking existence of an entry for destAddress " << firstKey << " and values: ["
        << tft.addr << "," << tft.destPort << "," << tft.srcPort << "]" << endl;
 
     // check if an entry for the given keys already exists
     TrafficFlowTemplateId ret= findTrafficFlow(firstKey,tft);
     if( ret ==! UNSPECIFIED_TFT )
     {
-        EV << "TrafficFlowFilter::addTrafficFlow - skipping duplicate entry  with destAddress " << firstKey << " and values: ["
+        EV_TRACE << "TrafficFlowFilter::addTrafficFlow - skipping duplicate entry  with destAddress " << firstKey << " and values: ["
            << tft.addr << "," << tft.destPort << "," << tft.srcPort << "]" << endl;
         return false;
     }
 
     filterTable_[firstKey].push_back(tft);
 
-    EV << "TrafficFlowFilter::addTrafficFlow - inserted entry: destAddr[" << firstKey << "] - TFT[" << tft.tftId << "]" << endl;
+    EV_TRACE << "TrafficFlowFilter::addTrafficFlow - inserted entry: destAddr[" << firstKey << "] - TFT[" << tft.tftId << "]" << endl;
     return true;
 }
 
@@ -189,7 +189,7 @@ void TrafficFlowFilter::loadFilterTable(const char * filterTableFile)
     unsigned int attrId = 0;
 
     // open and check xml file
-    EV << "TrafficFlowFilter::loadFilterTable - reading file " << filterTableFile << endl;
+    EV_TRACE << "TrafficFlowFilter::loadFilterTable - reading file " << filterTableFile << endl;
     cXMLElement* config = getEnvir()->getXMLDocument(filterTableFile);
     if (config == NULL)
         error("TrafficFlowFilter::loadFilterTable: Cannot read configuration from file: %s", filterTableFile);
@@ -218,7 +218,7 @@ void TrafficFlowFilter::loadFilterTable(const char * filterTableFile)
                 temp[attrId] = (*tftIt)->getAttribute(attributes[attrId]);
                 if (temp[attrId] == NULL && attributes[attrId])
                 {
-                    EV << "TrafficFlowFilter::loadFilterTable - attribute " << attributes[attrId] << " unspecified." << endl;
+                    EV_TRACE << "TrafficFlowFilter::loadFilterTable - attribute " << attributes[attrId] << " unspecified." << endl;
                 }
             }
 
@@ -251,7 +251,7 @@ void TrafficFlowFilter::loadFilterTable(const char * filterTableFile)
             {
                 if (temp[DEST_NAME] != NULL)
                 {
-                    EV << "TrafficFlowFilter::loadFilterTable - resolving IP address for host name " << temp[DEST_NAME] << endl;
+                    EV_TRACE << "TrafficFlowFilter::loadFilterTable - resolving IP address for host name " << temp[DEST_NAME] << endl;
                     destAddr = L3AddressResolver().resolve(temp[DEST_NAME]);
                 }
                 else if(ownerType_==PGW)
@@ -266,7 +266,7 @@ void TrafficFlowFilter::loadFilterTable(const char * filterTableFile)
             {
                 if (temp[SRC_NAME] != NULL)
                 {
-                    EV << "TrafficFlowFilter::loadFilterTable - resolving IP address for host name " << temp[SRC_NAME] << endl;
+                    EV_TRACE << "TrafficFlowFilter::loadFilterTable - resolving IP address for host name " << temp[SRC_NAME] << endl;
                     srcAddr = L3AddressResolver().resolve(temp[SRC_NAME]);
                 }
                 else if(ownerType_==ENB)

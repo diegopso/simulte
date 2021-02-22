@@ -99,7 +99,7 @@ void LteCompManagerBase::handleMessage(cMessage *msg)
         if (incoming == x2Manager_[IN])
         {
             // incoming data from X2 Manager
-            EV << "LteCompManagerBase::handleMessage - Received message from X2 manager" << endl;
+            EV_TRACE << "LteCompManagerBase::handleMessage - Received message from X2 manager" << endl;
             handleX2Message(pkt);
         }
         else
@@ -109,7 +109,7 @@ void LteCompManagerBase::handleMessage(cMessage *msg)
 
 void LteCompManagerBase::runClientOperations()
 {
-    EV << "LteCompManagerBase::runClientOperations - node " << nodeId_ << endl;
+    EV_TRACE << "LteCompManagerBase::runClientOperations - node " << nodeId_ << endl;
     provisionalSchedule();
     X2CompRequestIE* requestIe = buildClientRequest();
     sendClientRequest(requestIe);
@@ -117,7 +117,7 @@ void LteCompManagerBase::runClientOperations()
 
 void LteCompManagerBase::runCoordinatorOperations()
 {
-    EV << "LteCompManagerBase::runCoordinatorOperations - node " << nodeId_ << endl;
+    EV_TRACE << "LteCompManagerBase::runCoordinatorOperations - node " << nodeId_ << endl;
     doCoordination();
 
     // for each client, send the appropriate reply

@@ -30,7 +30,7 @@ void LteHarqProcessRx::insertPdu(Codeword cw, LteMacPdu *pdu)
     UserControlInfo *lteInfo = check_and_cast<UserControlInfo *>(pdu->getControlInfo());
     bool ndi = lteInfo->getNdi();
 
-    EV << "LteHarqProcessRx::insertPdu - ndi is " << ndi << endl;
+    EV_TRACE << "LteHarqProcessRx::insertPdu - ndi is " << ndi << endl;
     if (ndi && !(status_.at(cw) == RXHARQ_PDU_EMPTY))
         throw cRuntimeError("New data arriving in busy harq process -- this should not happen");
 
@@ -56,7 +56,9 @@ void LteHarqProcessRx::insertPdu(Codeword cw, LteMacPdu *pdu)
 
 bool LteHarqProcessRx::isEvaluated(Codeword cw)
 {
-    if (status_.at(cw) == RXHARQ_PDU_EVALUATING && (NOW - rxTime_.at(cw)) >= HARQ_FB_EVALUATION_INTERVAL)
+    // HARQ procedure abandoned for URLLC: https://doi.org/10.1109/JSAC.2019.2934001
+    //if (status_.at(cw) == RXHARQ_PDU_EVALUATING && (NOW - rxTime_.at(cw)) >= HARQ_FB_EVALUATION_INTERVAL)
+    if (status_.at(cw) == RXHARQ_PDU_EVALUATING)
         return true;
     else
         return false;
@@ -85,10 +87,10 @@ LteHarqFeedback *LteHarqProcessRx::createFeedback(Codeword cw)
         // NACK will be sent
         status_.at(cw) = RXHARQ_PDU_CORRUPTED;
 
-        EV << "LteHarqProcessRx::createFeedback - tx number " << (unsigned int)transmissions_ << endl;
+        EV_TRACE << "LteHarqProcessRx::createFeedback - tx number " << (unsigned int)transmissions_ << endl;
         if (transmissions_ == (maxHarqRtx_ + 1))
         {
-            EV << NOW << " LteHarqProcessRx::createFeedback - max number of tx reached for cw " << cw << ". Resetting cw" << endl;
+            EV_TRACE << NOW << " LteHarqProcessRx::createFeedback - max number of tx reached for cw " << cw << ". Resetting cw" << endl;
 
             // purge PDU
             purgeCorruptedPdu(cw);

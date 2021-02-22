@@ -32,7 +32,7 @@ void LteDrr::prepareSchedule()
         if(getBinder()->getOmnetId(nodeId) == 0){
             activeTempList_.erase();          // remove from the active list
             activeConnectionTempSet_.erase(cid);
-            EV << "CID " << cid << " of node "<< nodeId << " removed from active connection set - no OmnetId in Binder known.";
+            EV_TRACE << "CID " << cid << " of node "<< nodeId << " removed from active connection set - no OmnetId in Binder known.";
             continue;
         }
 
@@ -167,7 +167,7 @@ LteDrr::updateSchedulingInfo()
 void
 LteDrr::notifyActiveConnection(MacCid cid)
 {
-    EV << NOW << "LteDrr::notify CID: " << cid << endl;
+    EV_TRACE << NOW << "LteDrr::notify CID: " << cid << endl;
     //this is a mirror structure of activelist, used by all the modules that want to know the list of active users
     activeConnectionSet_.insert (cid);
 
@@ -181,7 +181,7 @@ LteDrr::notifyActiveConnection(MacCid cid)
 
     (drrMap_[cid]).eligible_=true;
 
-    EV << NOW << "LteSchedulerEnb::notifyDrr active: " << drrMap_[cid].active_ << endl;
+    EV_TRACE << NOW << "LteSchedulerEnb::notifyDrr active: " << drrMap_[cid].active_ << endl;
 }
 
 void

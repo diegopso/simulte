@@ -26,7 +26,7 @@ void BurstReceiver::initialize(int stage)
     else if (stage == INITSTAGE_APPLICATION_LAYER)
     {
         int port = par("localPort");
-        EV << "BurstReceiver::initialize - binding to port: local:" << port << endl;
+        EV_TRACE << "BurstReceiver::initialize - binding to port: local:" << port << endl;
         if (port != -1)
         {
             socket.setOutputGate(gate("udpOut"));
@@ -48,7 +48,7 @@ void BurstReceiver::handleMessage(cMessage *msg)
     numReceived_++;
 
     simtime_t delay = simTime()-pPacket->getTimestamp();
-    EV << "BurstReceiver::handleMessage - Packet received: FRAME[" << pPacket->getMsgId() << "] with delay["<< delay << "]" << endl;
+    EV_TRACE << "BurstReceiver::handleMessage - Packet received: FRAME[" << pPacket->getMsgId() << "] with delay["<< delay << "]" << endl;
 
     emit(burstPktDelay_, delay);
     emit(burstRcvdPkt_, (long)pPacket->getMsgId());

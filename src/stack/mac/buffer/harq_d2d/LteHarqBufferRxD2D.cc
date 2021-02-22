@@ -74,7 +74,7 @@ void LteHarqBufferRxD2D::insertPdu(Codeword cw, LteMacPdu *pdu)
     // TODO add codeword to inserPdu
     processes_[acid]->insertPdu(cw, pdu);
     // debug output
-    EV << "H-ARQ RX: new pdu (id " << pdu->getId() << " ) inserted into process " << (int) acid << endl;
+    EV_TRACE << "H-ARQ RX: new pdu (id " << pdu->getId() << " ) inserted into process " << (int) acid << endl;
 }
 
 void LteHarqBufferRxD2D::sendFeedback()
@@ -107,7 +107,7 @@ void LteHarqBufferRxD2D::sendFeedback()
 
                 // debug output:
                 const char *r = hfb->getResult() ? "ACK" : "NACK";
-                EV << "H-ARQ RX: feedback sent to TX process "
+                EV_TRACE << "H-ARQ RX: feedback sent to TX process "
                    << (int) hfb->getAcid() << " Codeword  " << (int) cw
                    << "of node with id "
                    << check_and_cast<UserControlInfo *>(
@@ -173,7 +173,7 @@ std::list<LteMacPdu *> LteHarqBufferRxD2D::extractCorrectPdus()
                 ret.push_back(temp);
                 acid = i;
 
-                EV << "LteHarqBufferRxD2D::extractCorrectPdus H-ARQ RX: pdu (id " << ret.back()->getId()
+                EV_TRACE << "LteHarqBufferRxD2D::extractCorrectPdus H-ARQ RX: pdu (id " << ret.back()->getId()
                    << " ) extracted from process " << (int) acid
                    << "to be sent upper" << endl;
             }

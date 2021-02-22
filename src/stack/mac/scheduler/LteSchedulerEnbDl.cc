@@ -66,7 +66,7 @@ LteSchedulerEnbDl::schedulePerAcidRtx(MacNodeId nodeId, Codeword cw, unsigned ch
             BandLimit elem;
             // copy the band
             elem.band_ = Band(i);
-            EV << "Putting band " << i << endl;
+            EV_TRACE << "Putting band " << i << endl;
             // mark as unlimited
             for (Codeword i = 0; i < MAX_CODEWORDS; ++i)
             {
@@ -76,7 +76,7 @@ LteSchedulerEnbDl::schedulePerAcidRtx(MacNodeId nodeId, Codeword cw, unsigned ch
         }
     }
 
-    EV << NOW << "LteSchedulerEnbDl::rtxAcid - Node [" << mac_->getMacNodeId() << "], User[" << nodeId << "],  Codeword [" << cw << "]  of [" << codewords << "] , ACID [" << (int)acid << "] " << endl;
+    EV_TRACE << NOW << "LteSchedulerEnbDl::rtxAcid - Node [" << mac_->getMacNodeId() << "], User[" << nodeId << "],  Codeword [" << cw << "]  of [" << codewords << "] , ACID [" << (int)acid << "] " << endl;
     //! \test REALISTIC!!!  Multi User MIMO support
     if (mac_->muMimo() && (txParams.readTxMode() == MULTI_USER))
     {
@@ -88,16 +88,16 @@ LteSchedulerEnbDl::schedulePerAcidRtx(MacNodeId nodeId, Codeword cw, unsigned ch
             //1) register pairing  - if pairing is already registered false is returned
             if (allocator_->configureMuMimoPeering(nodeId, peer))
             {
-                EV << "LteSchedulerEnb::grant MU-MIMO pairing established: main user [" << nodeId << "], paired user [" << peer << "]" << endl;
+                EV_TRACE << "LteSchedulerEnb::grant MU-MIMO pairing established: main user [" << nodeId << "], paired user [" << peer << "]" << endl;
             }
             else
             {
-                EV << "LteSchedulerEnb::grant MU-MIMO pairing already exists between users [" << nodeId << "] and [" << peer << "]" << endl;
+                EV_TRACE << "LteSchedulerEnb::grant MU-MIMO pairing already exists between users [" << nodeId << "] and [" << peer << "]" << endl;
             }
         }
         else
         {
-            EV << "LteSchedulerEnb::grant no MU-MIMO pairing available for user [" << nodeId << "]" << endl;
+            EV_TRACE << "LteSchedulerEnb::grant no MU-MIMO pairing available for user [" << nodeId << "]" << endl;
         }
     }
                 //!\test experimental DAS support
@@ -145,11 +145,11 @@ LteSchedulerEnbDl::schedulePerAcidRtx(MacNodeId nodeId, Codeword cw, unsigned ch
         Band b = bandLim->at(i).band_;
         int limit = bandLim->at(i).limit_.at(remappedCw);
 
-        EV << "LteSchedulerEnbDl::schedulePerAcidRtx --- BAND " << b << " LIMIT " << limit << "---" << endl;
+        EV_TRACE << "LteSchedulerEnbDl::schedulePerAcidRtx --- BAND " << b << " LIMIT " << limit << "---" << endl;
         // if the limit flag is set to skip, jump off
         if (limit == -2)
         {
-            EV << "LteSchedulerEnbDl::schedulePerAcidRtx - skipping logical band according to limit value" << endl;
+            EV_TRACE << "LteSchedulerEnbDl::schedulePerAcidRtx - skipping logical band according to limit value" << endl;
             continue;
         }
 
@@ -171,9 +171,9 @@ LteSchedulerEnbDl::schedulePerAcidRtx(MacNodeId nodeId, Codeword cw, unsigned ch
         if (limit >= 0 && !limitBl)
             available = limit < (int) available ? limit : available;
 
-        EV << NOW << "LteSchedulerEnbDl::rtxAcid ----- BAND " << b << "-----" << endl;
-        EV << NOW << "LteSchedulerEnbDl::rtxAcid To serve: " << bytes << " bytes" << endl;
-        EV << NOW << "LteSchedulerEnbDl::rtxAcid Available: " << available << " bytes" << endl;
+        EV_TRACE << NOW << "LteSchedulerEnbDl::rtxAcid ----- BAND " << b << "-----" << endl;
+        EV_TRACE << NOW << "LteSchedulerEnbDl::rtxAcid To serve: " << bytes << " bytes" << endl;
+        EV_TRACE << NOW << "LteSchedulerEnbDl::rtxAcid Available: " << available << " bytes" << endl;
 
         unsigned int allocation = 0;
         if (available < bytes)
@@ -191,7 +191,7 @@ LteSchedulerEnbDl::schedulePerAcidRtx(MacNodeId nodeId, Codeword cw, unsigned ch
         {
             unsigned int blocks = mac_->getAmc()->computeReqRbs(nodeId, b, remappedCw, allocation, direction_);
 
-            EV << NOW << "LteSchedulerEnbDl::rtxAcid Assigned blocks: " << blocks << "  blocks" << endl;
+            EV_TRACE << NOW << "LteSchedulerEnbDl::rtxAcid Assigned blocks: " << blocks << "  blocks" << endl;
 
             // assign only on the first codeword
             assignedBlocks.push_back(blocks);
@@ -205,7 +205,7 @@ LteSchedulerEnbDl::schedulePerAcidRtx(MacNodeId nodeId, Codeword cw, unsigned ch
     if (bytes > 0)
     {
         // process couldn't be served
-        EV << NOW << "LteSchedulerEnbDl::rtxAcid Cannot serve HARQ Process" << acid << endl;
+        EV_TRACE << NOW << "LteSchedulerEnbDl::rtxAcid Cannot serve HARQ Process" << acid << endl;
         return 0;
     }
 
@@ -227,7 +227,7 @@ LteSchedulerEnbDl::schedulePerAcidRtx(MacNodeId nodeId, Codeword cw, unsigned ch
     signal.first = acid;
     signal.second.push_back(cw);
 
-    EV << NOW << " LteSchedulerEnbDl::rtxAcid HARQ Process " << (int)acid << "  codeword  " << cw << " marking for retransmission " << endl;
+    EV_TRACE << NOW << " LteSchedulerEnbDl::rtxAcid HARQ Process " << (int)acid << "  codeword  " << cw << " marking for retransmission " << endl;
 
     // if allocated codewords is not MAX_CODEWORDS, then there's another allocated codeword , update the codewords variable :
 
@@ -254,7 +254,7 @@ LteSchedulerEnbDl::schedulePerAcidRtx(MacNodeId nodeId, Codeword cw, unsigned ch
 
     bytes = currHarq->pduLength(acid, cw);
 
-    EV << NOW << " LteSchedulerEnbDl::rtxAcid HARQ Process " << (int)acid << "  codeword  " << cw << ", " << bytes << " bytes served!" << endl;
+    EV_TRACE << NOW << " LteSchedulerEnbDl::rtxAcid HARQ Process " << (int)acid << "  codeword  " << cw << ", " << bytes << " bytes served!" << endl;
 
     return bytes;
 }
@@ -262,9 +262,9 @@ LteSchedulerEnbDl::schedulePerAcidRtx(MacNodeId nodeId, Codeword cw, unsigned ch
 bool
 LteSchedulerEnbDl::rtxschedule()
 {
-    EV << NOW << " LteSchedulerEnbDl::rtxschedule --------------------::[ START RTX-SCHEDULE ]::--------------------" << endl;
-    EV << NOW << " LteSchedulerEnbDl::rtxschedule Cell:  " << mac_->getMacCellId() << endl;
-    EV << NOW << " LteSchedulerEnbDl::rtxschedule Direction: " << (direction_ == DL ? "DL" : "UL") << endl;
+    EV_TRACE << NOW << " LteSchedulerEnbDl::rtxschedule --------------------::[ START RTX-SCHEDULE ]::--------------------" << endl;
+    EV_TRACE << NOW << " LteSchedulerEnbDl::rtxschedule Cell:  " << mac_->getMacCellId() << endl;
+    EV_TRACE << NOW << " LteSchedulerEnbDl::rtxschedule Direction: " << (direction_ == DL ? "DL" : "UL") << endl;
 
     // retrieving reference to HARQ entities
     HarqTxBuffers* harqQueues = mac_->getHarqTxBuffers();
@@ -297,8 +297,8 @@ LteSchedulerEnbDl::rtxschedule()
         // TODO SK Get the number of codewords - FIX with correct mapping
         unsigned int codewords = txParams.getLayers().size();// get the number of available codewords
 
-        EV << NOW << " LteSchedulerEnbDl::rtxschedule  UE: " << nodeId << endl;
-        EV << NOW << " LteSchedulerEnbDl::rtxschedule Number of codewords: " << codewords << endl;
+        EV_TRACE << NOW << " LteSchedulerEnbDl::rtxschedule  UE: " << nodeId << endl;
+        EV_TRACE << NOW << " LteSchedulerEnbDl::rtxschedule Number of codewords: " << codewords << endl;
 
 
         // get the number of HARQ processes
@@ -316,18 +316,18 @@ LteSchedulerEnbDl::rtxschedule()
 
                 if (allocatedCws_[nodeId]==codewords)
                     break;
-                EV << NOW << " LteSchedulerEnbDl::rtxschedule process " << process << endl;
-                EV << NOW << " LteSchedulerEnbDl::rtxschedule ------- CODEWORD " << cw << endl;
+                EV_TRACE << NOW << " LteSchedulerEnbDl::rtxschedule process " << process << endl;
+                EV_TRACE << NOW << " LteSchedulerEnbDl::rtxschedule ------- CODEWORD " << cw << endl;
 
                 // skip processes which are not in rtx status
                 if (currProc->getUnitStatus(cw) != TXHARQ_PDU_BUFFERED)
                 {
-                    EV << NOW << " LteSchedulerEnbDl::rtxschedule detected Acid: " << process << " in status " << currProc->getUnitStatus(cw) << endl;
+                    EV_TRACE << NOW << " LteSchedulerEnbDl::rtxschedule detected Acid: " << process << " in status " << currProc->getUnitStatus(cw) << endl;
                     continue;
                 }
 
-                EV << NOW << " LteSchedulerEnbDl::rtxschedule " << endl;
-                EV << NOW << " LteSchedulerEnbDl::rtxschedule detected RTX Acid: " << process << endl;
+                EV_TRACE << NOW << " LteSchedulerEnbDl::rtxschedule " << endl;
+                EV_TRACE << NOW << " LteSchedulerEnbDl::rtxschedule detected RTX Acid: " << process << endl;
 
                 // Get the bandLimit for the current user
                 std::vector<BandLimit>* bandLim;
@@ -343,7 +343,7 @@ LteSchedulerEnbDl::rtxschedule()
                 // if a value different from zero is returned, there was a service
                 if(bytes > 0)
                 {
-                    EV << NOW << " LteSchedulerEnbDl::rtxschedule CODEWORD IS NOW BUSY!!!" << endl;
+                    EV_TRACE << NOW << " LteSchedulerEnbDl::rtxschedule CODEWORD IS NOW BUSY!!!" << endl;
                     // do not process this HARQ process anymore
                     // go to next codeword
                     break;
@@ -353,8 +353,8 @@ LteSchedulerEnbDl::rtxschedule()
     }
 
     unsigned int availableBlocks = allocator_->computeTotalRbs();
-    EV << " LteSchedulerEnbDl::rtxschedule OFDM Space: " << availableBlocks << endl;
-    EV << "    LteSchedulerEnbDl::rtxschedule --------------------::[  END RTX-SCHEDULE  ]::-------------------- " << endl;
+    EV_TRACE << " LteSchedulerEnbDl::rtxschedule OFDM Space: " << availableBlocks << endl;
+    EV_TRACE << "    LteSchedulerEnbDl::rtxschedule --------------------::[  END RTX-SCHEDULE  ]::-------------------- " << endl;
 
     return (availableBlocks == 0);
 }

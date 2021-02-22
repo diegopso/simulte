@@ -40,7 +40,7 @@ LteSchedulerUeUl::schedule()
     // get the nodeId of the mac owner node
     MacNodeId nodeId = mac_->getMacNodeId();
 
-    EV << NOW << " LteSchedulerUeUl::schedule - Scheduling node " << nodeId << endl;
+    EV_TRACE << NOW << " LteSchedulerUeUl::schedule - Scheduling node " << nodeId << endl;
 
     // retrieve Transmission parameters
 //        const UserTxParams* txPar = grant->getUserTxParams();
@@ -59,7 +59,7 @@ LteSchedulerUeUl::schedule()
     {
         unsigned int availableBytes = grant->getGrantedCwBytes(cw);
 
-        EV << NOW << " LteSchedulerUeUl::schedule - Node " << mac_->getMacNodeId() << " available data from grant are "
+        EV_TRACE << NOW << " LteSchedulerUeUl::schedule - Node " << mac_->getMacNodeId() << " available data from grant are "
            << " blocks " << availableBlocks << " [" << availableBytes << " - Bytes]  on codeword " << cw << endl;
 
         // per codeword LCP scheduler invocation

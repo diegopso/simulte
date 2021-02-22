@@ -53,7 +53,7 @@ void LtePdcpRrcEnbD2D::fromDataPort(cPacket *pkt)
     }
 
     // Cid Request
-    EV << NOW << " LtePdcpRrcEnbD2D : Received CID request for Traffic [ " << "Source: "
+    EV_TRACE << NOW << " LtePdcpRrcEnbD2D : Received CID request for Traffic [ " << "Source: "
        << IPv4Address(lteInfo->getSrcAddr()) << "@" << lteInfo->getSrcPort()
        << " Destination: " << destAddr << "@" << lteInfo->getDstPort()
        << " , Direction: " << dirToA((Direction)lteInfo->getDirection()) << " ]\n";
@@ -72,14 +72,14 @@ void LtePdcpRrcEnbD2D::fromDataPort(cPacket *pkt)
         // assign a new LCID to the connection
         mylcid = lcid_++;
 
-        EV << "LtePdcpRrcEnbD2D : Connection not found, new CID created with LCID " << mylcid << "\n";
+        EV_TRACE << "LtePdcpRrcEnbD2D : Connection not found, new CID created with LCID " << mylcid << "\n";
 
         ht_->create_entry(lteInfo->getSrcAddr(), lteInfo->getDstAddr(),
             lteInfo->getSrcPort(), lteInfo->getDstPort(), lteInfo->getDirection(), mylcid);
     }
 
-    EV << "LtePdcpRrcEnbD2D : Assigned Lcid: " << mylcid << "\n";
-    EV << "LtePdcpRrcEnbD2D : Assigned Node ID: " << nodeId_ << "\n";
+    EV_TRACE << "LtePdcpRrcEnbD2D : Assigned Lcid: " << mylcid << "\n";
+    EV_TRACE << "LtePdcpRrcEnbD2D : Assigned Node ID: " << nodeId_ << "\n";
 
     // get the PDCP entity for this LCID
     LtePdcpEntity* entity = getEntity(mylcid);
@@ -101,11 +101,11 @@ void LtePdcpRrcEnbD2D::fromDataPort(cPacket *pkt)
     pdcpPkt->encapsulate(pkt);
     pdcpPkt->setControlInfo(lteInfo);
 
-    EV << "LtePdcp : Preparing to send "
+    EV_TRACE << "LtePdcp : Preparing to send "
        << lteTrafficClassToA((LteTrafficClass) lteInfo->getTraffic())
        << " traffic\n";
-    EV << "LtePdcp : Packet size " << pdcpPkt->getByteLength() << " Bytes\n";
-    EV << "LtePdcp : Sending packet " << pdcpPkt->getName() << " on port "
+    EV_TRACE << "LtePdcp : Packet size " << pdcpPkt->getByteLength() << " Bytes\n";
+    EV_TRACE << "LtePdcp : Sending packet " << pdcpPkt->getName() << " on port "
        << (lteInfo->getRlcType() == UM ? "UM_Sap$o\n" : "AM_Sap$o\n");
 
     // Send message
@@ -125,7 +125,7 @@ void LtePdcpRrcEnbD2D::handleMessage(cMessage* msg)
     // check whether the message is a notification for mode switch
     if (strcmp(pkt->getName(),"D2DModeSwitchNotification") == 0)
     {
-        EV << "LtePdcpRrcEnbD2D::handleMessage - Received packet " << pkt->getName() << " from port " << pkt->getArrivalGate()->getName() << endl;
+        EV_TRACE << "LtePdcpRrcEnbD2D::handleMessage - Received packet " << pkt->getName() << " from port " << pkt->getArrivalGate()->getName() << endl;
 
         D2DModeSwitchNotification* switchPkt = check_and_cast<D2DModeSwitchNotification*>(pkt);
 
@@ -142,7 +142,7 @@ void LtePdcpRrcEnbD2D::handleMessage(cMessage* msg)
 
 void LtePdcpRrcEnbD2D::pdcpHandleD2DModeSwitch(MacNodeId peerId, LteD2DMode newMode)
 {
-    EV << NOW << " LtePdcpRrcEnbD2D::pdcpHandleD2DModeSwitch - peering with UE " << peerId << " set to " << d2dModeToA(newMode) << endl;
+    EV_TRACE << NOW << " LtePdcpRrcEnbD2D::pdcpHandleD2DModeSwitch - peering with UE " << peerId << " set to " << d2dModeToA(newMode) << endl;
 
     // add here specific behavior for handling mode switch at the PDCP layer
 }

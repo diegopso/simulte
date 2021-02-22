@@ -31,7 +31,7 @@ void TrafficFlowFilterSimplified::initialize(int stage)
 
 EpcNodeType TrafficFlowFilterSimplified::selectOwnerType(const char * type)
 {
-    EV << "TrafficFlowFilterSimplified::selectOwnerType - setting owner type to " << type << endl;
+    EV_TRACE << "TrafficFlowFilterSimplified::selectOwnerType - setting owner type to " << type << endl;
     if(strcmp(type,"ENODEB") == 0)
         return ENB;
     if(strcmp(type,"PGW") != 0)
@@ -41,8 +41,8 @@ EpcNodeType TrafficFlowFilterSimplified::selectOwnerType(const char * type)
 
 void TrafficFlowFilterSimplified::handleMessage(cMessage *msg)
 {
-    EV << "TrafficFlowFilterSimplified::handleMessage - Received Packet:" << endl;
-    EV << "name: " << msg->getFullName() << endl;
+    EV_TRACE << "TrafficFlowFilterSimplified::handleMessage - Received Packet:" << endl;
+    EV_TRACE << "name: " << msg->getFullName() << endl;
 
     // receive and read IP datagram
     IPv4Datagram * datagram = check_and_cast<IPv4Datagram *>(msg);
@@ -51,7 +51,7 @@ void TrafficFlowFilterSimplified::handleMessage(cMessage *msg)
 
     // TODO check for source and dest port number
 
-    EV << "TrafficFlowFilterSimplified::handleMessage - Received datagram : " << datagram->getName() << " - src[" << srcAddr << "] - dest[" << destAddr << "]\n";
+    EV_TRACE << "TrafficFlowFilterSimplified::handleMessage - Received datagram : " << datagram->getName() << " - src[" << srcAddr << "] - dest[" << destAddr << "]\n";
 
     // run packet filter and associate a flowId to the connection (default bearer?)
     // search within tftTable the proper entry for this destination
@@ -59,7 +59,7 @@ void TrafficFlowFilterSimplified::handleMessage(cMessage *msg)
     if(tftId == -2)
     {
         // the destination has been removed from the simulation. Delete msg
-        EV << "TrafficFlowFilterSimplified::handleMessage - Destination has been removed from the simulation. Delete packet." << endl;
+        EV_TRACE << "TrafficFlowFilterSimplified::handleMessage - Destination has been removed from the simulation. Delete packet." << endl;
         delete msg;
     }
     else
@@ -70,7 +70,7 @@ void TrafficFlowFilterSimplified::handleMessage(cMessage *msg)
         tftInfo->setTft(tftId);
         datagram->setControlInfo(tftInfo);
 
-        EV << "TrafficFlowFilterSimplified::handleMessage - setting tft=" << tftId << endl;
+        EV_TRACE << "TrafficFlowFilterSimplified::handleMessage - setting tft=" << tftId << endl;
 
         // send the datagram to the GTP-U module
         send(datagram,"gtpUserGateOut");

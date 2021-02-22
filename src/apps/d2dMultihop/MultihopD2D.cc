@@ -46,7 +46,7 @@ void MultihopD2D::initialize(int stage)
     // avoid multiple initializations
     if (stage == INITSTAGE_APPLICATION_LAYER )
     {
-        EV << "MultihopD2D initialize: stage " << stage << endl;
+        EV_TRACE << "MultihopD2D initialize: stage " << stage << endl;
 
         localPort_ = par("localPort");
         destPort_ = par("destPort");
@@ -67,7 +67,7 @@ void MultihopD2D::initialize(int stage)
                 throw cRuntimeError("Bad value for k. It must be greater than zero");
         }
 
-        EV << "MultihopD2D::initialize - binding to port: local:" << localPort_ << " , dest:" << destPort_ << endl;
+        EV_TRACE << "MultihopD2D::initialize - binding to port: local:" << localPort_ << " , dest:" << destPort_ << endl;
         socket.setOutputGate(gate("udpOut"));
         socket.bind(localPort_);
 
@@ -131,7 +131,7 @@ void MultihopD2D::handleMessage(cMessage *msg)
 void MultihopD2D::handleEvent(unsigned int eventId)
 {
     Enter_Method_Silent("MultihopD2D::handleEvent()");
-    EV << simTime() << " MultihopD2D::handleEvent - Received event notification " << endl;
+    EV_TRACE << simTime() << " MultihopD2D::handleEvent - Received event notification " << endl;
 
     // the event id will be part of the message id
     localMsgId_ = eventId;
@@ -164,7 +164,7 @@ void MultihopD2D::sendPacket()
         packet->setMaxRadius(maxBroadcastRadius_);
     }
 
-    EV << "MultihopD2D::sendPacket - Sending msg "<< packet->getMsgid() <<  endl;
+    EV_TRACE << "MultihopD2D::sendPacket - Sending msg "<< packet->getMsgid() <<  endl;
     socket.sendTo(packet, destAddress_, destPort_);
 
     std::set<MacNodeId> targetSet;
@@ -179,7 +179,7 @@ void MultihopD2D::sendPacket()
 
 void MultihopD2D::handleRcvdPacket(cMessage* msg)
 {
-    EV << "MultihopD2D::handleRcvdPacket - Received packet from lower layer" << endl;
+    EV_TRACE << "MultihopD2D::handleRcvdPacket - Received packet from lower layer" << endl;
 
     MultihopD2DPacket* pkt = check_and_cast<MultihopD2DPacket*>(msg);
     pkt->removeControlInfo();
@@ -192,7 +192,7 @@ void MultihopD2D::handleRcvdPacket(cMessage* msg)
             counter_[msgId]++;
 
         // do not need to relay the message again
-        EV << "MultihopD2D::handleRcvdPacket - The message has already been received, counter = " << counter_[msgId] << endl;
+        EV_TRACE << "MultihopD2D::handleRcvdPacket - The message has already been received, counter = " << counter_[msgId] << endl;
 
         emit(d2dMultihopRcvdDupMsg_, (long)1);
         stat_->recordDuplicateReception(msgId);
@@ -229,18 +229,18 @@ void MultihopD2D::handleRcvdPacket(cMessage* msg)
         if (uniform(0.0,1.0) < selfishProbability_)
         {
             // selfish user, do not relay
-            EV << "MultihopD2D::handleRcvdPacket - The user is selfish, do not forward the message. " << endl;
+            EV_TRACE << "MultihopD2D::handleRcvdPacket - The user is selfish, do not forward the message. " << endl;
             delete pkt;
         }
         else if (pkt->getMaxRadius() > 0 && !isWithinBroadcastArea(pkt->getSrcCoord(), pkt->getMaxRadius()))
         {
-            EV << "MultihopD2D::handleRcvdPacket - The node is outside the broadcast area. Do not forward it. " << endl;
+            EV_TRACE << "MultihopD2D::handleRcvdPacket - The node is outside the broadcast area. Do not forward it. " << endl;
             delete pkt;
         }
         else if (pkt->getTtl() == 0)
         {
             // TTL expired
-            EV << "MultihopD2D::handleRcvdPacket - The TTL for this message has expired. Do not forward it. " << endl;
+            EV_TRACE << "MultihopD2D::handleRcvdPacket - The TTL for this message has expired. Do not forward it. " << endl;
             delete pkt;
         }
         else
@@ -253,7 +253,7 @@ void MultihopD2D::handleRcvdPacket(cMessage* msg)
 
                 simtime_t t = uniform(I_/2 , I_);
                 t = round(SIMTIME_DBL(t)*1000)/1000;
-                EV << "MultihopD2D::handleRcvdPacket - start Trickle interval, duration[" << t << "s]" << endl;
+                EV_TRACE << "MultihopD2D::handleRcvdPacket - start Trickle interval, duration[" << t << "s]" << endl;
 
                 scheduleAt(simTime() + t, timer);
                 delete pkt;
@@ -267,7 +267,7 @@ void MultihopD2D::handleRcvdPacket(cMessage* msg)
 
                 offset = round(SIMTIME_DBL(offset)*1000)/1000;
                 scheduleAt(simTime() + offset, pkt);
-                EV << "MultihopD2D::handleRcvdPacket - will relay the message in " << offset << "s" << endl;
+                EV_TRACE << "MultihopD2D::handleRcvdPacket - will relay the message in " << offset << "s" << endl;
             }
         }
     }
@@ -279,12 +279,12 @@ void MultihopD2D::handleTrickleTimer(cMessage* msg)
     unsigned int msgId = timer->getMsgid();
     if (counter_[msgId] < k_)
     {
-        EV << "MultihopD2D::handleTrickleTimer - relay the message, counter[" << counter_[msgId] << "] k[" << k_ << "]" << endl;
+        EV_TRACE << "MultihopD2D::handleTrickleTimer - relay the message, counter[" << counter_[msgId] << "] k[" << k_ << "]" << endl;
         relayPacket(last_[msgId]->dup());
     }
     else
     {
-        EV << "MultihopD2D::handleTrickleTimer - suppressed message, counter[" << counter_[msgId] << "] k[" << k_ << "]" << endl;
+        EV_TRACE << "MultihopD2D::handleTrickleTimer - suppressed message, counter[" << counter_[msgId] << "] k[" << k_ << "]" << endl;
         stat_->recordSuppressedMessage(msgId);
         emit(d2dMultihopTrickleSuppressedMsg_, (long)1);
     }
@@ -309,7 +309,7 @@ void MultihopD2D::relayPacket(cMessage* msg)
 
     pkt->setLastHopSenderId(lteNodeId_);
 
-    EV << "MultihopD2D::relayPacket - Relay msg " << pkt->getMsgid() << " to address " << destAddress_ << endl;
+    EV_TRACE << "MultihopD2D::relayPacket - Relay msg " << pkt->getMsgid() << " to address " << destAddress_ << endl;
     socket.sendTo(pkt, destAddress_, destPort_);
 
     markAsRelayed(pkt->getMsgid());    // mark the message as relayed

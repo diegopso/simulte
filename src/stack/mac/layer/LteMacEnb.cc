@@ -291,7 +291,7 @@ void LteMacEnb::handleMessage(cMessage *msg)
 
 void LteMacEnb::macSduRequest()
 {
-    EV << "----- START LteMacEnb::macSduRequest -----\n";
+    EV_TRACE << "----- START LteMacEnb::macSduRequest -----\n";
 
     // Ask for a MAC sdu for each scheduled user on each codeword
     LteMacScheduleList::const_iterator it;
@@ -320,7 +320,7 @@ void LteMacEnb::macSduRequest()
         sendUpperPackets(macSduRequest);
     }
 
-    EV << "------ END LteMacEnb::macSduRequest ------\n";
+    EV_TRACE << "------ END LteMacEnb::macSduRequest ------\n";
 }
 
 void LteMacEnb::bufferizeBsr(MacBsr* bsr, MacCid cid)
@@ -337,7 +337,7 @@ void LteMacEnb::bufferizeBsr(MacBsr* bsr, MacCid cid)
             bsrqueue->pushBack(vpkt);
             bsrbuf_[cid] = bsrqueue;
 
-            EV << "LteBsrBuffers : Added new BSR buffer for node: "
+            EV_TRACE << "LteBsrBuffers : Added new BSR buffer for node: "
                << MacCidToNodeId(cid) << " for Lcid: " << MacCidToLcid(cid)
                << " Current BSR size: " << bsr->getSize() << "\n";
 
@@ -361,7 +361,7 @@ void LteMacEnb::bufferizeBsr(MacBsr* bsr, MacCid cid)
             queuedBsr.second = bsr->getTimestamp();
             bsrqueue->pushBack(queuedBsr);
 
-            EV << "LteBsrBuffers : Using old buffer for node: " << MacCidToNodeId(
+            EV_TRACE << "LteBsrBuffers : Using old buffer for node: " << MacCidToNodeId(
                 cid) << " for Lcid: " << MacCidToLcid(cid)
                << " Current BSR size: " << bsr->getSize() << "\n";
 
@@ -374,7 +374,7 @@ void LteMacEnb::bufferizeBsr(MacBsr* bsr, MacCid cid)
             if (!bsrqueue->isEmpty())
                 bsrqueue->popFront();
 
-            EV << "LteBsrBuffers : Using old buffer for node: " << MacCidToNodeId(
+            EV_TRACE << "LteBsrBuffers : Using old buffer for node: " << MacCidToNodeId(
                 cid) << " for Lcid: " << MacCidToLcid(cid)
                << " - now empty" << "\n";
         }
@@ -383,7 +383,7 @@ void LteMacEnb::bufferizeBsr(MacBsr* bsr, MacCid cid)
 
 void LteMacEnb::sendGrants(LteMacScheduleList* scheduleList)
 {
-    EV << NOW << "LteMacEnb::sendGrants " << endl;
+    EV_TRACE << NOW << "LteMacEnb::sendGrants " << endl;
 
     while (!scheduleList->empty())
     {
@@ -428,7 +428,7 @@ void LteMacEnb::sendGrants(LteMacScheduleList* scheduleList)
         if (granted == 0)
         continue; // avoiding transmission of 0 grant (0 grant should not be created)
 
-        EV << NOW << " LteMacEnb::sendGrants Node[" << getMacNodeId() << "] - "
+        EV_TRACE << NOW << " LteMacEnb::sendGrants Node[" << getMacNodeId() << "] - "
            << granted << " blocks to grant for user " << nodeId << " on "
            << codewords << " codewords. CW[" << cw << "\\" << otherCw << "]" << endl;
 
@@ -479,7 +479,7 @@ void LteMacEnb::sendGrants(LteMacScheduleList* scheduleList)
             }
 
             grant->setGrantedCwBytes(cw, grantedBytes);
-            EV << NOW << " LteMacEnb::sendGrants - granting " << grantedBytes << " on cw " << cw << endl;
+            EV_TRACE << NOW << " LteMacEnb::sendGrants - granting " << grantedBytes << " on cw " << cw << endl;
         }
 
         RbMap map;
@@ -495,7 +495,7 @@ void LteMacEnb::sendGrants(LteMacScheduleList* scheduleList)
 
 void LteMacEnb::macHandleRac(cPacket* pkt)
 {
-    EV << NOW << " LteMacEnb::macHandleRac" << endl;
+    EV_TRACE << NOW << " LteMacEnb::macHandleRac" << endl;
 
     LteRac* racPkt = check_and_cast<LteRac*> (pkt);
     UserControlInfo* uinfo = check_and_cast<UserControlInfo*> (
@@ -515,7 +515,7 @@ void LteMacEnb::macHandleRac(cPacket* pkt)
 
 void LteMacEnb::macPduMake(MacCid cid)
 {
-    EV << "----- START LteMacEnb::macPduMake -----\n";
+    EV_TRACE << "----- START LteMacEnb::macPduMake -----\n";
     // Finalizes the scheduling decisions according to the schedule list,
     // detaching sdus from real buffers.
 
@@ -628,12 +628,12 @@ void LteMacEnb::macPduMake(MacCid cid)
         UnitList txList = (txBuf->firstAvailable());
 
         LteMacPdu* macPkt = pit->second;
-        EV << "LteMacBase: pduMaker created PDU: " << macPkt->info() << endl;
+        EV_TRACE << "LteMacBase: pduMaker created PDU: " << macPkt->info() << endl;
 
         // pdu transmission here (if any)
         if (txList.second.empty())
         {
-            EV << "macPduMake() : no available process for this MAC pdu in TxHarqBuffer" << endl;
+            EV_TRACE << "macPduMake() : no available process for this MAC pdu in TxHarqBuffer" << endl;
             delete macPkt;
         }
         else
@@ -643,7 +643,7 @@ void LteMacEnb::macPduMake(MacCid cid)
             txBuf->insertPdu(txList.first, cw, macPkt);
         }
     }
-    EV << "------ END LteMacEnb::macPduMake ------\n";
+    EV_TRACE << "------ END LteMacEnb::macPduMake ------\n";
 }
 
 void LteMacEnb::macPduUnmake(cPacket* pkt)
@@ -656,7 +656,7 @@ void LteMacEnb::macPduUnmake(cPacket* pkt)
         take(upPkt);
 
         // TODO: upPkt->info()
-        EV << "LteMacBase: pduUnmaker extracted SDU" << endl;
+        EV_TRACE << "LteMacBase: pduUnmaker extracted SDU" << endl;
         sendUpperPackets(upPkt);
     }
 
@@ -721,7 +721,7 @@ bool LteMacEnb::bufferizePacket(cPacket* pkt)
 
             lcgMap_.insert(LcgPair(tClass, CidBufferPair(cid, macBuffers_[cid])));
 
-            EV << "LteMacBuffers : Using new buffer on node: " <<
+            EV_TRACE << "LteMacBuffers : Using new buffer on node: " <<
             MacCidToNodeId(cid) << " for Lcid: " << MacCidToLcid(cid) << ", Bytes in the Queue: " <<
             vqueue->getQueueOccupancy() << "\n";
         }
@@ -730,7 +730,7 @@ bool LteMacEnb::bufferizePacket(cPacket* pkt)
             LteMacBuffer* vqueue = macBuffers_.find(cid)->second;
             vqueue->pushBack(vpkt);
 
-            EV << "LteMacBuffers : Using old buffer on node: " <<
+            EV_TRACE << "LteMacBuffers : Using old buffer on node: " <<
             MacCidToNodeId(cid) << " for Lcid: " << MacCidToLcid(cid) << ", Space left in the Queue: " <<
             vqueue->getQueueOccupancy() << "\n";
         }
@@ -750,7 +750,7 @@ bool LteMacEnb::bufferizePacket(cPacket* pkt)
 
         mbuf_[cid] = queue;
 
-        EV << "LteMacBuffers : Using new buffer on node: " <<
+        EV_TRACE << "LteMacBuffers : Using new buffer on node: " <<
         MacCidToNodeId(cid) << " for Lcid: " << MacCidToLcid(cid) << ", Space left in the Queue: " <<
         queue->getQueueSize() - queue->getByteLength() << "\n";
     }
@@ -771,12 +771,12 @@ bool LteMacEnb::bufferizePacket(cPacket* pkt)
                 emit(macBufferOverflowUl_,sample);
             }
 
-            EV << "LteMacBuffers : Dropped packet: queue" << cid << " is full\n";
+            EV_TRACE << "LteMacBuffers : Dropped packet: queue" << cid << " is full\n";
             delete pkt;
             return false;
         }
 
-        EV << "LteMacBuffers : Using old buffer on node: " <<
+        EV_TRACE << "LteMacBuffers : Using old buffer on node: " <<
         MacCidToNodeId(cid) << " for Lcid: " << MacCidToLcid(cid) << ", Space left in the Queue: " <<
         queue->getQueueSize() - queue->getByteLength() << "\n";
     }
@@ -815,7 +815,7 @@ void LteMacEnb::handleSelfMessage()
      *  MAIN LOOP  *
      ***************/
 
-    EV << "-----" << "ENB MAIN LOOP -----" << endl;
+    EV_TRACE << "-----" << "ENB MAIN LOOP -----" << endl;
 
     /*************
      * END DEBUG
@@ -841,7 +841,7 @@ void LteMacEnb::handleSelfMessage()
     }
 
     /*UPLINK*/
-    EV << "============================================== UPLINK ==============================================" << endl;
+    EV_TRACE << "============================================== UPLINK ==============================================" << endl;
     // init and reset global allocation information
     if (binder_->getLastUpdateUlTransmissionInfo() < NOW)  // once per TTI, even in case of multicell scenarios
         binder_->initAndResetUlTransmissionInfo();
@@ -854,9 +854,9 @@ void LteMacEnb::handleSelfMessage()
     LteMacScheduleList* scheduleListUl = enbSchedulerUl_->schedule();
     // send uplink grants to PHY layer
     sendGrants(scheduleListUl);
-    EV << "============================================ END UPLINK ============================================" << endl;
+    EV_TRACE << "============================================ END UPLINK ============================================" << endl;
 
-    EV << "============================================ DOWNLINK ==============================================" << endl;
+    EV_TRACE << "============================================ DOWNLINK ==============================================" << endl;
     /*DOWNLINK*/
     // Set current available OFDM space
     (enbSchedulerDl_->resourceBlocks()) = getNumRbDl();
@@ -876,7 +876,7 @@ void LteMacEnb::handleSelfMessage()
         // requests SDUs to the RLC layer
         macSduRequest();
     }
-    EV << "========================================== END DOWNLINK ============================================" << endl;
+    EV_TRACE << "========================================== END DOWNLINK ============================================" << endl;
 
     // purge from corrupted PDUs all Rx H-HARQ buffers for all users
     for (; hit != het; hit++)
@@ -890,7 +890,7 @@ void LteMacEnb::handleSelfMessage()
     flushHarqMsg->setSchedulingPriority(1);        // after other messages
     scheduleAt(NOW, flushHarqMsg);
 
-    EV << "--- END ENB MAIN LOOP ---" << endl;
+    EV_TRACE << "--- END ENB MAIN LOOP ---" << endl;
 }
 
 void LteMacEnb::flushHarqBuffers()

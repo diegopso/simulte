@@ -146,7 +146,7 @@ void LteMacEnbD2D::macPduUnmake(cPacket* pkt)
         take(upPkt);
 
         // TODO: upPkt->info()
-        EV << "LteMacEnbD2D: pduUnmaker extracted SDU" << endl;
+        EV_TRACE << "LteMacEnbD2D: pduUnmaker extracted SDU" << endl;
 
         // store descriptor for the incoming connection, if not already stored
         FlowControlInfo* lteInfo = check_and_cast<FlowControlInfo*>(upPkt->getControlInfo());
@@ -181,7 +181,7 @@ void LteMacEnbD2D::macPduUnmake(cPacket* pkt)
 
 void LteMacEnbD2D::sendGrants(LteMacScheduleList* scheduleList)
 {
-    EV << NOW << "LteMacEnbD2D::sendGrants " << endl;
+    EV_TRACE << NOW << "LteMacEnbD2D::sendGrants " << endl;
 
     while (!scheduleList->empty())
     {
@@ -226,7 +226,7 @@ void LteMacEnbD2D::sendGrants(LteMacScheduleList* scheduleList)
         if (granted == 0)
             continue; // avoiding transmission of 0 grant (0 grant should not be created)
 
-        EV << NOW << " LteMacEnbD2D::sendGrants Node[" << getMacNodeId() << "] - "
+        EV_TRACE << NOW << " LteMacEnbD2D::sendGrants Node[" << getMacNodeId() << "] - "
            << granted << " blocks to grant for user " << nodeId << " on "
            << codewords << " codewords. CW[" << cw << "\\" << otherCw << "]" << endl;
 
@@ -275,7 +275,7 @@ void LteMacEnbD2D::sendGrants(LteMacScheduleList* scheduleList)
             }
 
             grant->setGrantedCwBytes(cw, grantedBytes);
-            EV << NOW << " LteMacEnbD2D::sendGrants - granting " << grantedBytes << " on cw " << cw << endl;
+            EV_TRACE << NOW << " LteMacEnbD2D::sendGrants - granting " << grantedBytes << " on cw " << cw << endl;
         }
         RbMap map;
 
@@ -289,7 +289,7 @@ void LteMacEnbD2D::sendGrants(LteMacScheduleList* scheduleList)
 
 void LteMacEnbD2D::clearBsrBuffers(MacNodeId ueId)
 {
-    EV << NOW << "LteMacEnbD2D::clearBsrBuffers - Clear BSR buffers of UE " << ueId << endl;
+    EV_TRACE << NOW << "LteMacEnbD2D::clearBsrBuffers - Clear BSR buffers of UE " << ueId << endl;
 
     // empty all BSR buffers belonging to the UE
     LteMacBufferMap::iterator vit = bsrbuf_.begin();
@@ -300,16 +300,16 @@ void LteMacEnbD2D::clearBsrBuffers(MacNodeId ueId)
         if (MacCidToNodeId(cid) != ueId)
             continue;
 
-        EV << NOW << "LteMacEnbD2D::clearBsrBuffers - Clear BSR buffer for cid " << cid << endl;
+        EV_TRACE << NOW << "LteMacEnbD2D::clearBsrBuffers - Clear BSR buffer for cid " << cid << endl;
 
         // empty its BSR buffer
         LteMacBuffer* buf = vit->second;
-        EV << NOW << "LteMacEnbD2D::clearBsrBuffers - Length was " << buf->getQueueOccupancy() << endl;
+        EV_TRACE << NOW << "LteMacEnbD2D::clearBsrBuffers - Length was " << buf->getQueueOccupancy() << endl;
 
         while (!buf->isEmpty())
             buf->popFront();
 
-        EV << NOW << "LteMacEnbD2D::clearBsrBuffers - New length is " << buf->getQueueOccupancy() << endl;
+        EV_TRACE << NOW << "LteMacEnbD2D::clearBsrBuffers - New length is " << buf->getQueueOccupancy() << endl;
 
     }
 }
@@ -373,7 +373,7 @@ void LteMacEnbD2D::sendModeSwitchNotification(MacNodeId srcId, MacNodeId dstId, 
 {
     Enter_Method_Silent("sendModeSwitchNotification");
 
-    EV << NOW << " LteMacEnbD2D::sendModeSwitchNotification - " << srcId << " --> " << dstId << " going from " << d2dModeToA(oldMode) << " to " << d2dModeToA(newMode) << endl;
+    EV_TRACE << NOW << " LteMacEnbD2D::sendModeSwitchNotification - " << srcId << " --> " << dstId << " going from " << d2dModeToA(oldMode) << " to " << d2dModeToA(newMode) << endl;
 
     // send switch notification to both the tx and rx side of the flow
     D2DModeSwitchNotification* switchPktTx = new D2DModeSwitchNotification("D2DModeSwitchNotification");
@@ -430,7 +430,7 @@ void LteMacEnbD2D::macHandleD2DModeSwitch(cPacket* pkt)
             FlowControlInfo* lteInfo = check_and_cast<FlowControlInfo*>(&(jt->second));
             if (MacCidToNodeId(cid) == nodeId)
             {
-                EV << NOW << " LteMacEnbD2D::sendModeSwitchNotification - send signal for TX entity to upper layers in the eNB (cid=" << cid << ")" << endl;
+                EV_TRACE << NOW << " LteMacEnbD2D::sendModeSwitchNotification - send signal for TX entity to upper layers in the eNB (cid=" << cid << ")" << endl;
                 D2DModeSwitchNotification* switchPktTx = switchPkt->dup();
                 switchPktTx->setTxSide(true);
                 if (oldMode == IM)
@@ -476,7 +476,7 @@ void LteMacEnbD2D::macHandleD2DModeSwitch(cPacket* pkt)
                     resetHarq_[nodeId] = NOW;
                 }
 
-                EV << NOW << " LteMacEnbD2D::sendModeSwitchNotification - send signal for RX entity to upper layers in the eNB (cid=" << cid << ")" << endl;
+                EV_TRACE << NOW << " LteMacEnbD2D::sendModeSwitchNotification - send signal for RX entity to upper layers in the eNB (cid=" << cid << ")" << endl;
                 D2DModeSwitchNotification* switchPktRx = switchPkt->dup();
                 switchPktRx->setTxSide(false);
                 if (oldMode == IM)
@@ -528,7 +528,7 @@ void LteMacEnbD2D::fromPhy(cPacket *pkt)
         MacNodeId d2dReceiver = check_and_cast<LteHarqFeedbackMirror*>(hfbpkt)->getD2dReceiverId();
         D2DPair pair(d2dSender, d2dReceiver);
         HarqBuffersMirrorD2D::iterator hit = harqBuffersMirrorD2D_.find(pair);
-        EV << NOW << "LteMacEnbD2D::fromPhy - node " << nodeId_ << " Received HARQ Feedback pkt (mirrored)" << endl;
+        EV_TRACE << NOW << "LteMacEnbD2D::fromPhy - node " << nodeId_ << " Received HARQ Feedback pkt (mirrored)" << endl;
         if (hit == harqBuffersMirrorD2D_.end())
         {
             // if a feedback arrives, a buffer should exists (unless it is an handover scenario

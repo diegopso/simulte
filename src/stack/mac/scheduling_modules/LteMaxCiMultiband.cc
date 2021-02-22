@@ -92,7 +92,7 @@ void LteMaxCiMultiband::prepareSchedule()
         // Pop the top connection from the list.
         ScoreDesc current = score.top ();
 
-        EV << NOW << " LteMaxCiMultiband::schedule scheduling connection " << current.x_ << " with score of " << current.score_ << endl;
+        EV_TRACE << NOW << " LteMaxCiMultiband::schedule scheduling connection " << current.x_ << " with score of " << current.score_ << endl;
 
         // Grant data to that connection.
         bool terminate = false;
@@ -100,7 +100,7 @@ void LteMaxCiMultiband::prepareSchedule()
         bool eligible = true;
         unsigned int granted = requestGrant (current.x_, 4294967295U, terminate, active, eligible);
 
-        EV << NOW << "LteMaxCiMultiband::schedule granted " << granted << " bytes to connection " << current.x_ << endl;
+        EV_TRACE << NOW << "LteMaxCiMultiband::schedule granted " << granted << " bytes to connection " << current.x_ << endl;
 
         // Exit immediately if the terminate flag is set.
         if ( terminate ) break;
@@ -109,13 +109,13 @@ void LteMaxCiMultiband::prepareSchedule()
         if ( ! active || ! eligible )
         {
             score.pop ();
-            EV << NOW << "LteMaxCiMultiband::schedule  connection " << current.x_ << " was found ineligible" << endl;
+            EV_TRACE << NOW << "LteMaxCiMultiband::schedule  connection " << current.x_ << " was found ineligible" << endl;
         }
 
         // Set the connection as inactive if indicated by the grant ().
         if ( ! active )
         {
-            EV << NOW << "LteMaxCiMultiband::schedule scheduling connection " << current.x_ << " set to inactive " << endl;
+            EV_TRACE << NOW << "LteMaxCiMultiband::schedule scheduling connection " << current.x_ << " set to inactive " << endl;
 
             activeConnectionTempSet_.erase (current.x_);
         }
@@ -134,12 +134,12 @@ void LteMaxCiMultiband::updateSchedulingInfo()
 
 void LteMaxCiMultiband::notifyActiveConnection(MacCid cid)
 {
-    EV << NOW << "LteMaxCiMultiband::notify CID notified " << cid<< "/"<<MacCidToNodeId(cid) << endl;
+    EV_TRACE << NOW << "LteMaxCiMultiband::notify CID notified " << cid<< "/"<<MacCidToNodeId(cid) << endl;
     activeConnectionSet_.insert(cid);
 }
 
 void LteMaxCiMultiband::removeActiveConnection(MacCid cid)
 {
-    EV << NOW << "LteMaxCiMultiband::remove CID removed " << cid<< "/"<<MacCidToNodeId(cid) << endl;
+    EV_TRACE << NOW << "LteMaxCiMultiband::remove CID removed " << cid<< "/"<<MacCidToNodeId(cid) << endl;
     activeConnectionSet_.erase(cid);
 }

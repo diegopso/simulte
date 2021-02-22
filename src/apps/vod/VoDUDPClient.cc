@@ -19,7 +19,7 @@ void VoDUDPClient::initialize(int stage)
     if (stage != inet::INITSTAGE_APPLICATION_LAYER)
         return;
     /* Get parameters from INI file */
-    EV << "VoD Client initialize: stage " << stage << endl;
+    EV_TRACE << "VoD Client initialize: stage " << stage << endl;
 
     stringstream ss;
     ss << getId();
